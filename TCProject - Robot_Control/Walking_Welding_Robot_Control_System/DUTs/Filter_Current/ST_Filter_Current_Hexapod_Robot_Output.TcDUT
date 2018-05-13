@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_Filter_Current_Hexapod_Robot_Output" Id="{5ff930fa-b987-4f08-94d5-1c11cd46f543}">
+    <Declaration><![CDATA[TYPE ST_Filter_Current_Hexapod_Robot_Output :
+STRUCT
+	Current_Monitor: matrix_18_real_T;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

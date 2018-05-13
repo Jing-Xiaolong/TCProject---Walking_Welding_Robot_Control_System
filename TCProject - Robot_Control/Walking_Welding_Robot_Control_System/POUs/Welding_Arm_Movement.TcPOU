@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="Welding_Arm_Movement" Id="{be4647aa-b609-471d-9f30-0d85f817ad2b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Welding_Arm_Movement
+VAR_INPUT
+	ExSetPoint_Execute	: BOOL;							// 机器人外部信号发生使能
+	ExtSetPointEnable	: BOOL;							// 外部信号发生信号
+	ExtSetPointDisable	: BOOL;							// 外部信号结束信号
+
+END_VAR
+
+VAR
+	Axis_Number					: INT;	
+	// ====================Simulink模块相关=====================
+	Welding_Arm_Simulink		: FB_WeldingArm6AxisMotion_Control(oid:=16#01010050);	// Simulink模型定义
+	
+		// -- 输入 --
+	t_Interval			: LREAL:=0.001;						// 取样时间间隔，默认为1ms
+	t					: LREAL:=0;							// 取样当前时间变量，以0为起点
+		// -- 输出 --
+	T_ALL				: LREAL:=100;						// Simulink模型运动总时长
+	ExSetPoint_Position	: ARRAY[1..6] OF LREAL;				// 外部信号位置
+END_VAR
+
+VAR CONSTANT
+	MotorNum			: INT := 6;
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// =======================子程序使能(永久运行)===================
+Variable_Monitor();			// 变量监测子程序使能
+Logic_Control();			// 逻辑控制子程序使能
+Variable_Set();				// 变量设置
+//Safety();					// 保证丝杠行程和电机速度在规定范围内
+
+// =======================外部信号运动程序=======================
+IF ExSetPoint_Execute OR Welding_Arm_Control.Home_Execute THEN
+	//SetGenerator();			// 使能外部信号发生子程序
+	Welding_Arm_Simulink.Execute();	// Simulink模型使能
+	FOR Axis_Number := 1 TO Welding_Arm_Control.MotorNum {BY 1} DO
+		Welding_Arm_Control.Axis_Welding_Arm[Axis_Number].ExtSetPoint(Drive_ExtSetPointEnable:= ExtSetPointEnable, 
+											Drive_ExtSetPointDisable:= ExtSetPointDisable, 
+											ExSetPosition:= ExSetPoint_Position[Axis_Number]);
+	END_FOR
+END_IF
+
+// ======================外部信号发生=========================
+IF ExtSetPointEnable THEN	
+	//FOR Axis_Number := 1 TO 2 {BY 1} DO
+	t := t + t_Interval;
+	ExtSetPointDisable := FALSE;
+	//END_FOR
+END_IF
+
+IF t>=T_ALL THEN
+	ExtSetPointEnable := FALSE;
+	t:=0;
+	ExtSetPointDisable := TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="Logic_Control" Id="{4f843fbd-5dc4-4e5a-a52c-9b7792d3b0ab}">
+      <Implementation>
+        <ST><![CDATA[// =======================控制逻辑区==========================
+// 保证所有的动作拥有合理的先后顺序，优化控制逻辑
+// 也防止出现两个或两个以上动作同时进行的情况，保证控制安全
+
+// =====================外部信号发生逻辑========================
+IF ExSetPoint_Execute THEN
+	Welding_Arm_Control.Home_Execute := FALSE;						// 外部信号发生使能时，机器人调零必须结束
+ELSIF NOT ExSetPoint_Execute THEN
+	ExtSetPointEnable := 0;						// 外部信号发生不使能时，外部信号不能进入程序
+	ExtSetPointDisable :=0;
+ELSIF ExtSetPointDisable THEN
+	ExtSetPointEnable :=0;						// 外部信号发生停止与外部信号发生开始不能同时进行
+END_IF
+
+
+IF Welding_Arm_Control.Home_Execute OR Welding_Arm_Control.Move_Absolute_Execute OR Welding_Arm_Control.Move_Relative_Execute THEN
+	ExSetPoint_Execute := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Safety" Id="{cb94ea09-b07e-4169-b491-ec9bda178e37}">
+      <Implementation>
+        <ST><![CDATA[// 保证丝杠行程和电机速度在规定范围内
+
+// 如果没在找零，检测到焊接臂升降或径向关节接近开关信号即停止焊接臂上所有电机
+
+//IF Digital_Inputs[1].18 THEN
+//	pos_up := Axis_Welding_Arm[1].ActPosition;
+//	range_v := pos_down - pos_up;
+//	Axis_Power[1] := FALSE;
+//END_IF
+//IF Digital_Inputs[1].19 THEN
+//	pos_down := Axis_Welding_Arm[1].ActPosition;
+//	Axis_Move_Relative_Position[1] := -300;
+//ELSE
+//	Axis_Move_Relative_Position[1] := 200;
+//END_IF
+
+//IF Digital_Inputs[2].20 THEN
+//	pos_far := Axis_Welding_Arm[2].ActPosition;
+//	range_h := pos_far - pos_near;
+//	Axis_Power[2] := FALSE;
+//END_IF
+//IF Digital_Inputs[2].21 THEN
+//	pos_near := Axis_Welding_Arm[2].ActPosition;
+
+//	Axis_Move_Relative_Position[2] := 200;
+//ELSE
+//	Axis_Move_Relative_Position[2] := 3;
+//END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Variable_Monitor" Id="{b0869ebc-a6ac-48e5-ba91-12bfa9a9c451}">
+      <Implementation>
+        <ST><![CDATA[// =====================关键数据信号监测======================]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Variable_Set" Id="{0c9b20e7-cb7c-4e67-a1cb-8d148b658bbf}">
+      <Implementation>
+        <ST><![CDATA[// ===================程序与模型的变量链接===================
+
+	// -- 输入 -- 
+Welding_Arm_Simulink.stInput.t := t;								// 采样时间t与Simulink模型中的采样时间链接
+
+	// -- 输出 -- 
+T_ALL := Welding_Arm_Simulink.stOutput.T_ALL;
+FOR Axis_Number := 1 TO MotorNum {BY 1} DO
+	ExSetPoint_Position[Axis_Number] := Welding_Arm_Simulink.stOutput.Disp_J[Axis_Number-1]; // Simulink中的电机输出位移输入到控制模型
+END_FOR]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="Welding_Arm_Movement">
+      <LineId Id="3" Count="2" />
+      <LineId Id="1582" Count="0" />
+      <LineId Id="751" Count="0" />
+      <LineId Id="1253" Count="9" />
+      <LineId Id="1898" Count="13" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Welding_Arm_Movement.Logic_Control">
+      <LineId Id="2" Count="1" />
+      <LineId Id="115" Count="3" />
+      <LineId Id="120" Count="6" />
+      <LineId Id="131" Count="3" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="Welding_Arm_Movement.Safety">
+      <LineId Id="12" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="43" Count="3" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="47" Count="3" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="Welding_Arm_Movement.Variable_Monitor">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="Welding_Arm_Movement.Variable_Set">
+      <LineId Id="133" Count="2" />
+      <LineId Id="142" Count="2" />
+      <LineId Id="160" Count="2" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

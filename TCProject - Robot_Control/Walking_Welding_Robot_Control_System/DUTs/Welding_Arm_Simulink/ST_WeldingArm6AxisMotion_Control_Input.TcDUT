@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_WeldingArm6AxisMotion_Control_Input" Id="{8a9f9719-a791-48ce-b8bc-ea98ed662091}">
+    <Declaration><![CDATA[TYPE ST_WeldingArm6AxisMotion_Control_Input :
+STRUCT
+	t: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

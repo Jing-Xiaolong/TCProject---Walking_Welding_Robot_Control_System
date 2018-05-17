@@ -2,43 +2,50 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
   <POU Name="Welding_Arm_Movement" Id="{be4647aa-b609-471d-9f30-0d85f817ad2b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Welding_Arm_Movement
-VAR_INPUT
-	ExSetPoint_Execute	: BOOL;							// 机器人外部信号发生使能
-	ExtSetPointEnable	: BOOL;							// 外部信号发生信号
-	ExtSetPointDisable	: BOOL;							// 外部信号结束信号
-
-END_VAR
-
-VAR
-	Axis_Number					: INT;	
-	// ====================Simulink模块相关=====================
-	Welding_Arm_Simulink		: FB_WeldingArm6AxisMotion_Control(oid:=16#01010050);	// Simulink模型定义
-	
-		// -- 输入 --
-	t_Interval			: LREAL:=0.001;						// 取样时间间隔，默认为1ms
-	t					: LREAL:=0;							// 取样当前时间变量，以0为起点
-		// -- 输出 --
-	T_ALL				: LREAL:=100;						// Simulink模型运动总时长
-	ExSetPoint_Position	: ARRAY[1..6] OF LREAL;				// 外部信号位置
-END_VAR
 
 VAR CONSTANT
 	MotorNum			: INT := 6;
 END_VAR
 
+VAR_INPUT
+	ExSetPoint_Execute	: BOOL;					// 机器人外部信号发生使能
+	ExtSetPointEnable	: BOOL;					// 外部信号发生信号
+	ExtSetPointDisable	: BOOL;					// 外部信号结束信号
+END_VAR
 
-]]></Declaration>
+VAR
+	Axis_Number			: INT;					// 轴数量,用来遍历轴	
+	
+	// ====== 定义Simulink模块 ======
+	Welding_Arm_Simulink: FB_WeldingArm6AxisMotion_Control(oid:=16#01010050);	// Simulink模型定义
+	
+		// Simulink输入
+	t_Interval			: LREAL := 0.001;		// 取样时间间隔，默认为1ms
+	t					: LREAL := 0;			// 取样当前时间变量，以0为起点
+		// Simulink输出
+	T_ALL				: LREAL := 100;			// Simulink模型运动总时长
+	ExSetPoint_Position	: ARRAY[1..6] OF LREAL;// 外部信号位置
+END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// =======================子程序使能(永久运行)===================
-Variable_Monitor();			// 变量监测子程序使能
-Logic_Control();			// 逻辑控制子程序使能
-Variable_Set();				// 变量设置
-//Safety();					// 保证丝杠行程和电机速度在规定范围内
+      <ST><![CDATA[
+Variable_Monitor();			// 变量监测程序
 
-// =======================外部信号运动程序=======================
+Logic_Control();			// 逻辑控制程序
+
+Variable_Set();				// 变量设置程序
+
+ExSetPoint_Action();		// 外部发生运动程序
+
+//Safety();					// 强安全措施]]></ST>
+    </Implementation>
+    <Action Name="ExSetPoint_Action" Id="{2c0acc4b-d225-47d6-b296-e19bd489ab05}">
+      <Implementation>
+        <ST><![CDATA[
+// ====== Simulink激活与外部信号运动 ======
 IF ExSetPoint_Execute OR Welding_Arm_Control.Home_Execute THEN
-	//SetGenerator();			// 使能外部信号发生子程序
-	Welding_Arm_Simulink.Execute();	// Simulink模型使能
+	// Simulink激活
+	Welding_Arm_Simulink.Execute();	
+	// 外部信号运动开始
 	FOR Axis_Number := 1 TO Welding_Arm_Control.MotorNum {BY 1} DO
 		Welding_Arm_Control.Axis_Welding_Arm[Axis_Number].ExtSetPoint(Drive_ExtSetPointEnable:= ExtSetPointEnable, 
 											Drive_ExtSetPointDisable:= ExtSetPointDisable, 
@@ -46,20 +53,19 @@ IF ExSetPoint_Execute OR Welding_Arm_Control.Home_Execute THEN
 	END_FOR
 END_IF
 
-// ======================外部信号发生=========================
-IF ExtSetPointEnable THEN	
-	//FOR Axis_Number := 1 TO 2 {BY 1} DO
+// ====== 采样时间 =======
+IF ExtSetPointEnable THEN
 	t := t + t_Interval;
-	ExtSetPointDisable := FALSE;
-	//END_FOR
+	ExtSetPointDisable 	:= FALSE;
 END_IF
 
 IF t>=T_ALL THEN
-	ExtSetPointEnable := FALSE;
-	t:=0;
-	ExtSetPointDisable := TRUE;
+	ExtSetPointEnable 	:= FALSE;
+	t := 0;
+	ExtSetPointDisable 	:= TRUE;
 END_IF]]></ST>
-    </Implementation>
+      </Implementation>
+    </Action>
     <Action Name="Logic_Control" Id="{4f843fbd-5dc4-4e5a-a52c-9b7792d3b0ab}">
       <Implementation>
         <ST><![CDATA[// =======================控制逻辑区==========================
@@ -134,12 +140,24 @@ END_FOR]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="Welding_Arm_Movement">
-      <LineId Id="3" Count="2" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="1944" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="1945" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="1946" Count="2" />
       <LineId Id="1582" Count="0" />
-      <LineId Id="751" Count="0" />
-      <LineId Id="1253" Count="9" />
-      <LineId Id="1898" Count="13" />
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Welding_Arm_Movement.ExSetPoint_Action">
+      <LineId Id="3" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="7" Count="8" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="6" />
+      <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Welding_Arm_Movement.Logic_Control">
       <LineId Id="2" Count="1" />

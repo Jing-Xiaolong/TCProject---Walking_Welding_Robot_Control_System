@@ -3,67 +3,58 @@
   <POU Name="Welding_Arm_Control" Id="{79012545-a31d-43cd-9623-21b4a0000016}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Welding_Arm_Control
 
+VAR CONSTANT
+	MotorNum					: INT := 6;								// 接入控制的电机数量
+END_VAR
+
 VAR_INPUT
-		// ===================模块动作信号(按动作先后排列)==========
-	Power_Execute 		: BOOL;									// 上电使能控制信号
-	Axis_Power			: ARRAY[1..MotorNum] OF BOOL;					// 单电机使能
-	Welding_Arm_Power	: BOOL;									// 焊接臂所有电机使能
+	// ====== 模块动作信号(按动作先后排列) ======
+	Power_Execute 				: BOOL;									// 上电使能
+	Axis_Power					: ARRAY[1..MotorNum] OF BOOL;			// 单电机上电
+	Welding_Arm_Power			: BOOL;									// 焊接臂所有电机上电
 	
-	Home_Execute		: BOOL;									// 设置零点程序使能
+	Home_Execute				: BOOL;									// 找零使能
+	Axis_Home_Set				: ARRAY[1..MotorNum] OF BOOL;			// 单电机找零
+	Welding_Arm_Home_Set		: BOOL;									// 焊接臂所有电机找零
 
-	Leg_Home_Set		: ARRAY[1..MotorNum] OF BOOL;	
-	Axis_Home_Set		: ARRAY[1..MotorNum] OF BOOL;					// 单电机设定零点信号
-	Welding_Arm_Home_Set		: BOOL;							// 焊接臂所有电机设定零点信号
-
+	Reset_Execute				: BOOL;									// 电机驱动重置使能
+	Axis_Reset					: ARRAY[1..MotorNum] OF BOOL;			// 单电机驱动重置
+	Welding_Arm_Reset			: BOOL;									// 焊接臂整体电机驱动重置
 	
-	Move_Absolute_Execute		: BOOL;							// 绝对运动使能信号
-	Move_Relative_Execute		: BOOL;							// 相对运动使能信号
-	Welding_Arm_Move_Execute	: BOOL;							// 焊接臂运动程序使能	
-	Axis_Absolute_Eable			: ARRAY[1..MotorNum] OF BOOL;			// 单电机绝对运动使能信号
-	Axis_Relative_Eable			: ARRAY[1..MotorNum] OF BOOL;			// 单电机相对运动使能信号
-	Welding_Arm_Absolute_Eable	: ARRAY[1..MotorNum] OF BOOL;			// 焊接臂站立使能信号
-	Axis_Move_Absolute_Position	: ARRAY[1..MotorNum] OF LREAL;			// 电机绝对运动位置
-	Axis_Move_Relative_Position	: ARRAY[1..MotorNum] OF LREAL;			// 电机相对运动位置			
+	Welding_Arm_Move_Execute	: BOOL;									// 焊接臂运动程序使能	
+	Move_Absolute_Execute		: BOOL;									// 绝对运动使能
+	Move_Relative_Execute		: BOOL;									// 相对运动使能
+	Axis_Absolute_Eable			: ARRAY[1..MotorNum] OF BOOL;			// 单电机绝对运动使能
+	Axis_Relative_Eable			: ARRAY[1..MotorNum] OF BOOL;			// 单电机相对运动使能
+	Axis_Move_Absolute_Position	: ARRAY[1..MotorNum] OF LREAL;			// 单电机绝对运动位置
+	Axis_Move_Relative_Position	: ARRAY[1..MotorNum] OF LREAL;			// 单电机相对运动位置			
 	
-	Reset_Execute		: BOOL;									// 电机驱动重置动作发生使能
-	Axis_Reset			: ARRAY[1..MotorNum] OF BOOL;					// 单电机驱动重置信号使能
-	Welding_Arm_Reset			: BOOL;							// 焊接臂整体电机驱动重置
 END_VAR
 VAR
-	// =======================NC轴变量==========================
-	Axis_Welding_Arm	: ARRAY[1..MotorNum] OF Axis;					// 定义焊接臂轴参量(可以调整数据上限来调整电机数目)
-	Leg_Number			: INT;									// 定义焊接臂腿数
-	Axis_Number 		: INT;									// 定义轴数目
+	// ====== NC轴变量 ======
+	Axis_Welding_Arm			: ARRAY[1..MotorNum] OF Axis;			// 定义焊接臂轴参量(可以调整数据上限来调整电机数目)
+	Axis_Number 				: INT;									// 定义轴数目
 	
-	// ===================状态监测变量=======================
-	Power_Status					: ARRAY[1..MotorNum] OF BOOL;			// 上电监测信号
-	Leg_Home_Done					: ARRAY[1..MotorNum] OF BOOL;
-	Home_Done						: ARRAY[1..MotorNum] OF BOOL;			// 找零监测信号
-	MoveAbsoluteDone				: ARRAY[1..MotorNum] OF BOOL;			// 电机绝对运动监测信号
-	MoveRelativeDone				: ARRAY[1..MotorNum] OF BOOL;			// 电机相对运动监测信号
+	// ====== 状态监测变量 ======
+	Power_Status				: ARRAY[1..MotorNum] OF BOOL;			// 单电机上电状态;
+	Home_Done					: ARRAY[1..MotorNum] OF BOOL;			// 单电机找零状态
+	MoveAbsoluteDone			: ARRAY[1..MotorNum] OF BOOL;			// 单电机绝对运动状态
+	MoveRelativeDone			: ARRAY[1..MotorNum] OF BOOL;			// 单电机相对运动状态
 	
-	Welding_Arm_Error				: BOOL;									// 焊接臂电机错误信号
-	Axis_Error						: ARRAY[1..MotorNum] OF BOOL;			// 电机错误监测信号
-	Axis_ErrorID					: ARRAY[1..MotorNum] OF UDINT;			// 电机错误号码监测信号
+	Welding_Arm_Error			: BOOL;									// 焊接臂电机错误信号
+	Axis_Error					: ARRAY[1..MotorNum] OF BOOL;			// 单电机错误信号
+	Axis_ErrorID				: ARRAY[1..MotorNum] OF UDINT;			// 单电机错误码
 	
-	Axis_ActPostion					: ARRAY[1..MotorNum] OF LREAL;			// 电机轴实际位置
-	Axis_ActVelocity				: ARRAY[1..MotorNum] OF LREAL;			// 电机轴实际速度
-	Mapping_ActPosition				: Variable_Control_Mapping_Model;		// 电机位置映射
-	Motor_ActPosition				: ARRAY[1..MotorNum] OF LREAL;			// Mapping后的电机轴实际位置
+	Axis_ActPostion				: ARRAY[1..MotorNum] OF LREAL;			// 单电机实际位置
+	Axis_ActVelocity			: ARRAY[1..MotorNum] OF LREAL;			// 单电机实际速度
 	
-	Current_Turque_Value  AT%IW0	: ARRAY[1..MotorNum] OF INT ;			// 电流、力矩相关值
-	Digital_Inputs  AT%I* 			: ARRAY[1..MotorNum] OF DINT ;			// 数字输入信号（Link到驱动器中的Digital Inputs）
+	Current_Turque_Value  AT%IW0: ARRAY[1..MotorNum] OF INT ;			// 单电机实际电流
+	Digital_Inputs  	  AT%I* : ARRAY[1..MotorNum] OF DINT ;			// 驱动数字输入信号（Link到驱动器中的Digital Inputs）
 	
-	Home_Switch_value 				: ARRAY[1..MotorNum] OF BOOL;			// 限位开关真假值
+	Home_Switch_value 			: ARRAY[1..MotorNum] OF BOOL;			// 限位开关值
 	
-	Max_Turque_Value 				: INT ;								// 设置最大找零力矩边界值(机械限位法找零时用来判断运动极限位置)
-	Switch_Home_Limit				: ARRAY[1..MotorNum] OF DINT ;				// 找零点时接触开关信号值
-END_VAR
-
-VAR CONSTANT
-	MotorNum			: INT := 6;								// 接入控制的电机数量
-END_VAR
-]]></Declaration>
+	Max_Turque_Value 			: INT ;									// 最大电流边界值(机械限位法找零时用来判断运动极限位置)
+END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// =======================子程序使能(永久运行)===================
 Variable_Monitor();			// 变量监测子程序使能

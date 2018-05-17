@@ -76,8 +76,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"265"</v>
+              <v n="TextDefault">"%.2f mm/s"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"217"</v>
               <v n="TextDefault">"%.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"264"</v>
+              <v n="TextDefault">"%.4f mm"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -871,6 +881,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"270"</v>
+              <v n="TextDefault">"Simulink控制区域"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"176"</v>
               <v n="TextDefault">"State=%.3f"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -971,8 +986,23 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"266"</v>
+              <v n="TextDefault">"上电操作区域"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"250"</v>
               <v n="TextDefault">"信号监测"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"273"</v>
+              <v n="TextDefault">"停止运动信号:"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"272"</v>
+              <v n="TextDefault">"停止运动终止信号:"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1078,6 +1108,11 @@
             <o>
               <v n="TextID">"193"</v>
               <v n="TextDefault">"找零操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"268"</v>
+              <v n="TextDefault">"找零操作区域"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1206,6 +1241,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"269"</v>
+              <v n="TextDefault">"本界面用于焊接臂运动及控制操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"208"</v>
               <v n="TextDefault">"本界面用于焊接臂运动控制操作"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1228,6 +1268,11 @@
             <o>
               <v n="TextID">"259"</v>
               <v n="TextDefault">"焊接臂调试与控制"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"267"</v>
+              <v n="TextDefault">"状态监测区域"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1323,6 +1368,11 @@
             <o>
               <v n="TextID">"210"</v>
               <v n="TextDefault">"进行Simulink运动操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"271"</v>
+              <v n="TextDefault">"驱动重设区域"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
           </l>

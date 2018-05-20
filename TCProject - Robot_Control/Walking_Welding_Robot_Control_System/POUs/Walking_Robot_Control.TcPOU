@@ -74,18 +74,29 @@ Robot_Single_Motor_Action();	// 机器人单个电机运动程序
     </Implementation>
     <Action Name="Leg_Action" Id="{4c1abdbd-87a5-4a2a-b095-1d68b1c20f72}">
       <Implementation>
-        <ST><![CDATA[// ===================机器人单挑腿找零程序====================
+        <ST><![CDATA[
+// ====== 机器人单挑腿找零程序 ======
 IF Home_Execute THEN
 	FOR Leg_Number := 1 TO 6 {BY 1} DO
-		IF Leg_Home_Set[Leg_Number] THEN		// 在可视化中，Leg_Home_Set为点动
+		IF Leg_Home_Set[Leg_Number] THEN
+			// 某条腿找零,即代表该条腿上的三个电机就开始找零
 			Axis_Home_Set[1+(Leg_Number-1)*3] := Leg_Home_Set[Leg_Number];
 			Axis_Home_Set[2+(Leg_Number-1)*3] := Leg_Home_Set[Leg_Number];
 			Axis_Home_Set[3+(Leg_Number-1)*3] := Leg_Home_Set[Leg_Number];
 		ELSIF Home_Done[1+(Leg_Number-1)*3] AND Home_Done[2+(Leg_Number-1)*3] AND Home_Done[3+(Leg_Number-1)*3] THEN
+			// 某条腿上三个电机找零结束,[单腿找零]信号关闭
+			// 实际上,这个ELSIF不可能进入,因为Home_Done是一个宽度为PLC周期的脉冲信号,一腿上三个电机不可能同时找零完成
+			// 在Logic_Control中规定了Home_Done信号发生即对Axis_Home_Set置FALSE,因此不用担心找零完成后[单电机找零]还处于开启状态
 			Leg_Home_Set[Leg_Number] := FALSE; 
-			Axis_Home_Set[1+(Leg_Number-1)*3] := Axis_Home_Set[2+(Leg_Number-1)*3] := Axis_Home_Set[3+(Leg_Number-1)*3] := FALSE;
+			Axis_Home_Set[1+(Leg_Number-1)*3] := FALSE;
+			Axis_Home_Set[2+(Leg_Number-1)*3] := FALSE;
+			Axis_Home_Set[3+(Leg_Number-1)*3] := FALSE;
 		END_IF
-		
+					
+		// 由于Home_Done信号不会同时发生,因此不能用它来判断是否单腿找零完成(单腿三电机都找零完成),可以适用位置来判断
+		// Simulink模型规定的单腿三电机初始位置与实际位置误差均小于0.01后,即可认为单腿找零完成
+		// 这里的Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable也可使用Axis_Robot[Axis_Number].Home_Absolute_Position
+		// 因为已经在Variable_Set中将前者设定为后者了
 		IF ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[1+(Leg_Number-1)*3]-Axis_ActPostion[1+(Leg_Number-1)*3])<0.01 AND 
 			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[2+(Leg_Number-1)*3]-Axis_ActPostion[2+(Leg_Number-1)*3])<0.01 AND
 			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[3+(Leg_Number-1)*3]-Axis_ActPostion[3+(Leg_Number-1)*3])<0.01 THEN
@@ -93,26 +104,30 @@ IF Home_Execute THEN
 		ELSE
 			Leg_Home_Done[Leg_Number]	:= FALSE;
 		END_IF
-		
+
+		// 单组三腿135均完成找零,则该组腿找零完成
 		IF Leg_Home_Done[1] AND Leg_Home_Done[3] AND Leg_Home_Done[5] THEN
 			Tripod_Home_Done[1]		:= TRUE;
 		ELSE
 			Tripod_Home_Done[1]		:= FALSE;
 		END_IF
-		
+		// 单组三腿246均完成找零,则该组腿找零完成
 		IF Leg_Home_Done[2] AND Leg_Home_Done[4] AND Leg_Home_Done[6] THEN
 			Tripod_Home_Done[2]		:= TRUE;
 		ELSE
 			Tripod_Home_Done[2]		:= FALSE;
 		END_IF
 		
+		// 两组都找零完成,则整个机器人找零完成
 		IF Tripod_Home_Done[1]	AND Tripod_Home_Done[2]	THEN
 			Robot_Home_Done			:= TRUE;
 		ELSE
 			Robot_Home_Done			:= FALSE;
 		END_IF
 	END_FOR
-END_IF]]></ST>
+END_IF
+
+// ====== 机器人其它单腿运动程序 ======]]></ST>
       </Implementation>
     </Action>
     <Action Name="Logic_Control" Id="{c215c7dc-fc9f-4378-b645-9582d910ac24}">
@@ -420,24 +435,38 @@ END_IF
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Leg_Action">
+      <LineId Id="43" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="2" Count="0" />
-      <LineId Id="4" Count="5" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="5" Count="3" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="9" Count="0" />
       <LineId Id="13" Count="0" />
+      <LineId Id="51" Count="1" />
       <LineId Id="10" Count="0" />
-      <LineId Id="14" Count="2" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="15" Count="1" />
       <LineId Id="18" Count="3" />
       <LineId Id="17" Count="0" />
-      <LineId Id="22" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="64" Count="0" />
       <LineId Id="24" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="27" Count="1" />
       <LineId Id="25" Count="0" />
-      <LineId Id="29" Count="8" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="30" Count="5" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="36" Count="1" />
       <LineId Id="39" Count="1" />
       <LineId Id="38" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="3" Count="0" />
+      <LineId Id="41" Count="1" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Logic_Control">
@@ -445,8 +474,12 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Robot_Action">
-      <LineId Id="2" Count="21" />
-      <LineId Id="31" Count="2" />
+      <LineId Id="2" Count="2" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="6" Count="17" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="33" Count="0" />
       <LineId Id="90" Count="0" />
       <LineId Id="92" Count="0" />
       <LineId Id="54" Count="0" />

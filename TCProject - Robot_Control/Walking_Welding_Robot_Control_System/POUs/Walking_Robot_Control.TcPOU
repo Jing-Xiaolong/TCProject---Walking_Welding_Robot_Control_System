@@ -121,65 +121,70 @@ END_IF]]></ST>
 // 保证所有的动作拥有合理的先后顺序，优化控制逻辑
 // 也防止出现两个或两个以上动作同时进行的情况，保证控制安全
 
-// ===================电机驱动重置逻辑========================
-//FOR Axis_Number := 1 TO 18 {BY 1} DO
+// ====== 电机驱动重置逻辑 ======
 IF Axis_Error[1] OR Axis_Error[2] OR Axis_Error[3] OR Axis_Error[4] OR Axis_Error[5] OR Axis_Error[6]
 	 OR Axis_Error[7] OR Axis_Error[8] OR Axis_Error[9] OR Axis_Error[10] OR Axis_Error[11] OR Axis_Error[12]
-		OR Axis_Error[13] OR Axis_Error[14] OR Axis_Error[15] OR Axis_Error[16] OR Axis_Error[17] OR Axis_Error[18]
-THEN
+		OR Axis_Error[13] OR Axis_Error[14] OR Axis_Error[15] OR Axis_Error[16] OR Axis_Error[17] OR Axis_Error[18] THEN
+	// 某一个电机出现错误,代表整个六足即有错
 	Robot_Error := TRUE;
 ELSE
 	Robot_Error := FALSE;
 END_IF
-//END_FOR
 
 IF Robot_Error THEN
+	// 电机出现错误,则[驱动重置]开关开启,允许重置
 	Reset_Execute := TRUE;
 ELSIF NOT Robot_Error THEN
+	// 电机没有错误,则[驱动重置]开关关闭,不允许重置
 	Reset_Execute := FALSE;
 ELSIF NOT Reset_Execute THEN
 	Axis_Reset[Axis_Number] := FALSE;
 	Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
 END_IF
 
-// =====================上电程序逻辑==========================
+// ====== 上电程序逻辑 ======
 IF NOT Power_Execute THEN
+	// [上电使能]关闭,所有电机必须立即断电
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
 		Axis_Power[Axis_Number] := FALSE;
 		Axis_Robot[Axis_Number].Power(Axis_Enable:= Axis_Power[Axis_Number]);
 	END_FOR
-	Home_Execute := FALSE;			// 未上电时，不能进行找零操作
-	Move_Execute := FALSE;			// 未上电时，不能进行运动操作
+	// 未上电时，不能进行找零
+	Home_Execute := FALSE;			
+	// 未上电时，不能进行运动
+	Move_Execute := FALSE;			
 END_IF
 
-// =====================找零程序逻辑==========================
+// ====== 找零程序逻辑 ======
 IF Home_Execute THEN
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		IF Home_Done[Axis_Number] THEN			// 	丝杠到达零点位置后，单电机标零使能位关闭			
+		// 	丝杠到达零点位置后，单电机标零使能位关闭		
+		IF Home_Done[Axis_Number] THEN				
 			Axis_Home_Set[Axis_Number] :=0;	
 			Axis_Robot[Axis_Number].Home(Drive_Home:= Axis_Home_Set[Axis_Number]);
 		END_IF
 	END_FOR
-	Move_Execute :=0;							// 设定零点时，不能进行其他运动
-	//ExSetPoint_Execute :=0;
+	// 设定零点时，不能进行运动
+	Move_Execute :=0;							
 ELSIF NOT Home_Execute THEN
+	// [找零使能]关闭,不允许找零
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		//Axis_Start_Back[Axis_Number] :=0;
 		Axis_Home_Set[Axis_Number] := 0;
 	END_FOR
 END_IF
 
-// =====================机器人站立逻辑==========================
+// ====== 机器人站立逻辑 ======
 IF Move_Execute THEN
-	//Absolute_Eable := TRUE;
-	Home_Execute := FALSE;						// 站立运动使能时，机器人调零必须结束
-	//ExSetPoint_Execute :=0;						// 站立运动时，不能进行其他运动
+	// 站立运动使能时，机器人调零必须结束
+	Home_Execute := FALSE;
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		IF MoveAbsoluteDone[Axis_Number] THEN	// 	丝杠到达设定位置后，单电机绝对运动使能位关闭
+		// 	丝杠到达设定位置后，单电机绝对运动使能位关闭
+		IF MoveAbsoluteDone[Axis_Number] THEN	
 			Axis_Absolute_Eable[Axis_Number] := FALSE;
 		END_IF
 	END_FOR
-ELSIF NOT Move_Execute THEN						// 站立运动不使能,轴不能运动
+ELSIF NOT Move_Execute THEN						
+	// 站立运动不使能,轴不能运动
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
 		Axis_Absolute_Eable[Axis_Number] := FALSE;
 		Axis_Robot[Axis_Number].Move_Absolute(	Drive_Move_Absolute:= Axis_Absolute_Eable[Axis_Number], 
@@ -418,25 +423,7 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Logic_Control">
-      <LineId Id="2" Count="3" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="7" Count="2" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="11" Count="3" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="17" Count="14" />
-      <LineId Id="80" Count="1" />
-      <LineId Id="32" Count="9" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="56" Count="1" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="59" Count="5" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="68" Count="11" />
+      <LineId Id="105" Count="72" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Robot_Action">

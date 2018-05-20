@@ -152,10 +152,21 @@ IF Robot_Error THEN
 ELSIF NOT Robot_Error THEN
 	// 电机没有错误,则[驱动重置]开关关闭,不允许重置
 	Reset_Execute := FALSE;
-ELSIF NOT Reset_Execute THEN
+END_IF
+
+	// [重置使能]关闭,所有电机均不能重置
+IF NOT Reset_Execute THEN
 	Axis_Reset[Axis_Number] := FALSE;
 	Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
 END_IF
+
+	// 这五行两个作用： 1. 若电机没错误,则不允许重置
+	// 2. 清除错误后自动将[单电机重置]信号关闭,不然得手动关闭
+FOR Axis_Number := 1 TO 18 {BY 1} DO
+	IF NOT Axis_Error[1] THEN
+		Axis_Reset[Axis_Number] := FALSE;
+	END_IF
+END_FOR
 
 // ====== 上电程序逻辑 ======
 IF NOT Power_Execute THEN
@@ -473,7 +484,21 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Logic_Control">
-      <LineId Id="105" Count="72" />
+      <LineId Id="105" Count="18" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="187" Count="1" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="128" Count="49" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Robot_Action">

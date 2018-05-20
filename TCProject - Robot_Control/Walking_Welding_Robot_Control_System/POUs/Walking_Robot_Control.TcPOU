@@ -291,45 +291,45 @@ END_IF
       <Implementation>
         <ST><![CDATA[// =====================关键数据信号监测======================
 
-// ====== 最大力矩设置区(边界控制条件)=================
+// ====== 设置最大力矩(边界控制条件) ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Axis_Robot[Axis_Number].Max_Turque_Value := Max_Turque_Value;
 END_FOR
 
-// =======================力矩检测区==========================
+// ====== 检测、映射力矩 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
+	// 检测实际力矩,Current_Turque_Value 链接到I/O中对应电机的Digital_Input_1(即驱动监测到的实际力矩)
 	Axis_Robot[Axis_Number].Current_Turque_Value := Current_Turque_Value[Axis_Number];
+	// 驱动监测到的实际力矩为INT,而Mapping_Current的输入,输出均是LREAL,需要进行变量强制转换
 	Current_Before_Mapping[Axis_Number] := INT_TO_LREAL(Current_Turque_Value[Axis_Number]);
 END_FOR
+	// 将检测到的电机实际力矩,映射到Simulink控制模型中对应腿的力矩
 Mapping_Current(Controller_Leg_Variable:= Current_Before_Mapping, Model_Leg_Variable=> Current_After_Mapping);
 
-// ====================轴实际位置、速度检测区=======================
+// ====== 检测轴实际位置、速度检测区 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Axis_ActPostion[Axis_Number] := Axis_Robot[Axis_Number].ActPosition;
 	Axis_ActVelocity[Axis_Number] := Axis_Robot[Axis_Number].ActVelocity;
 END_FOR
+	// 将检测到的电机实际位置,映射到Simulink控制模型中对应腿的位置
 Mapping_ActPosition(Controller_Leg_Variable:= Axis_ActPostion, Model_Leg_Variable=> Motor_ActPosition);
 
-// =======================上电状态检测区======================
+// ====== 检测上电状态 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Power_Status[Axis_Number] := Axis_Robot[Axis_Number].State_PowerStatus;
 END_FOR
 
-// =======================找零状态检测区======================
+// ====== 检测找零状态 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Home_Done[Axis_Number] := Axis_Robot[Axis_Number].State_HomeDone;
 END_FOR
 
-(*FOR Leg_Number := 1 TO 6 {BY 1} DO
-	Leg_Home_Done[Leg_Number] := Leg_Robot[Axis_Number].State_HomeDone;
-END_FOR*)
-
-// ===================电机绝对运动状态检测区==================
+// ====== 检测绝对运动状态 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	MoveAbsoluteDone[Axis_Number] := Axis_Robot[Axis_Number].State_MoveAbsoluteDone;
 END_FOR
 
-// =======================电机错误检测区======================
+// ====== 检测电机错误 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Axis_Error[Axis_Number] := Axis_Robot[Axis_Number].Axis_Error;
 	Axis_ErrorID[Axis_Number] := Axis_Robot[Axis_Number].Axis_ErrorID;
@@ -418,10 +418,25 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Logic_Control">
-      <LineId Id="2" Count="29" />
+      <LineId Id="2" Count="3" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="7" Count="2" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="11" Count="3" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="17" Count="14" />
       <LineId Id="80" Count="1" />
       <LineId Id="32" Count="9" />
-      <LineId Id="54" Count="25" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="59" Count="5" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="68" Count="11" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Robot_Action">
@@ -443,15 +458,9 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Variable_Monitor">
-      <LineId Id="2" Count="8" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="11" Count="1" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="13" Count="2" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="17" Count="25" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="54" Count="32" />
+      <LineId Id="91" Count="10" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Variable_Set">

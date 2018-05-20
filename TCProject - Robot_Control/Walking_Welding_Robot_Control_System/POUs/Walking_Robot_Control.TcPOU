@@ -49,52 +49,27 @@ VAR
 	Mapping_ActPosition		: Variable_Control_Mapping_Model;// 电机位置映射
 	Motor_ActPosition		: ARRAY[1..18] OF LREAL;		// Mapping后的电机轴实际位置
 	
-	Current_Turque_Value AT%IW0 : ARRAY[1..18] OF INT;		// 电流、力矩相关值
-	
 	Max_Turque_Value		: INT;							// 设置最大力矩边界值
 	
 	Mapping_Current			: Variable_Control_Mapping_Model;// 电流值映射
+	Current_Turque_Value AT%IW0 : ARRAY[1..18] OF INT;		// 驱动检测到的实际电机的力矩
 	Current_Before_Mapping	: ARRAY[1..18] OF LREAL ;		// 将Current_Turque_Value从INT转换成LREAL,用来进行变量监测
-	Current_After_Mapping	: ARRAY[1..18] OF LREAL;		// 映射后的原始电流值,用来进行变量监测
+	Current_After_Mapping	: ARRAY[1..18] OF LREAL;		// 映射后的电流值,即Simulink对应腿的电流
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// =======================子程序使能(永久运行)===================
-Variable_Monitor();			// 变量监测子程序使能
-Logic_Control();			// 逻辑控制子程序使能
-Variable_Set();				// 各动作速度子程序使能
-Leg_Action();				// 单腿运动子程序使能
-Robot_Action();				// 机器人整体运动子程序使能
+      <ST><![CDATA[
+Variable_Monitor();				// 变量监测程序
 
-// =====================电机驱动重置=============================
-IF Reset_Execute THEN
-	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
-	END_FOR
-END_IF
+Logic_Control();				// 逻辑控制程序
 
-// =======================电机上电===============================
-IF Power_Execute THEN
-	//Filter_Current_Simulink.Execute();
-	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		Axis_Robot[Axis_Number].Power(Axis_Enable:= Axis_Power[Axis_Number]);
-	END_FOR
-END_IF
+Variable_Set();					// 变量设定程序
 
-// =======================找零程序===============================
-IF Home_Execute THEN
-	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		Axis_Robot[Axis_Number].Home(Drive_Home:= Axis_Home_Set[Axis_Number]);
-	END_FOR
-END_IF
+Leg_Action();					// 单腿运动程序
 
-// =======================站立程序===============================
-IF Move_Execute THEN
-	FOR Axis_Number := 1 TO 18 {BY 1} DO
-		Axis_Robot[Axis_Number].Move_Absolute(	Drive_Move_Absolute:= Axis_Absolute_Eable[Axis_Number], 
-												Absolute_Position:= Axis_Move_Position[Axis_Number]);
-	END_FOR
-END_IF
+Robot_Action();					// 机器人整体运动程序
+
+Robot_Single_Motor_Action();	// 机器人单个电机运动程序
 ]]></ST>
     </Implementation>
     <Action Name="Leg_Action" Id="{4c1abdbd-87a5-4a2a-b095-1d68b1c20f72}">
@@ -272,6 +247,41 @@ ELSIF NOT Robot_Stand_Execute AND NOT Move_Execute THEN
 END_IF]]></ST>
       </Implementation>
     </Action>
+    <Action Name="Robot_Single_Motor_Action" Id="{b0d2189b-618b-43c8-9d18-e11ffa78b97b}">
+      <Implementation>
+        <ST><![CDATA[
+// =====================电机驱动重置=============================
+IF Reset_Execute THEN
+	FOR Axis_Number := 1 TO 18 {BY 1} DO
+		Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
+	END_FOR
+END_IF
+
+// =======================电机上电===============================
+IF Power_Execute THEN
+	//Filter_Current_Simulink.Execute();
+	FOR Axis_Number := 1 TO 18 {BY 1} DO
+		Axis_Robot[Axis_Number].Power(Axis_Enable:= Axis_Power[Axis_Number]);
+	END_FOR
+END_IF
+
+// =======================找零程序===============================
+IF Home_Execute THEN
+	FOR Axis_Number := 1 TO 18 {BY 1} DO
+		Axis_Robot[Axis_Number].Home(Drive_Home:= Axis_Home_Set[Axis_Number]);
+	END_FOR
+END_IF
+
+// =======================站立程序===============================
+IF Move_Execute THEN
+	FOR Axis_Number := 1 TO 18 {BY 1} DO
+		Axis_Robot[Axis_Number].Move_Absolute(	Drive_Move_Absolute:= Axis_Absolute_Eable[Axis_Number], 
+												Absolute_Position:= Axis_Move_Position[Axis_Number]);
+	END_FOR
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="Safety" Id="{542f773f-76d3-4f8a-a71b-dd89f39b1cbb}">
       <Implementation>
         <ST><![CDATA[// 保证丝杠行程和电机速度在规定范围内]]></ST>
@@ -281,7 +291,7 @@ END_IF]]></ST>
       <Implementation>
         <ST><![CDATA[// =====================关键数据信号监测======================
 
-// ==============最大力矩设置区(边界控制条件)=================
+// ====== 最大力矩设置区(边界控制条件)=================
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	Axis_Robot[Axis_Number].Max_Turque_Value := Max_Turque_Value;
 END_FOR
@@ -372,14 +382,18 @@ END_IF
       </Implementation>
     </Action>
     <LineIds Name="Walking_Robot_Control">
-      <LineId Id="3" Count="2" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="316" Count="0" />
       <LineId Id="107" Count="0" />
+      <LineId Id="314" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="254" Count="0" />
-      <LineId Id="9" Count="8" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="18" Count="18" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="317" Count="0" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Leg_Action">
@@ -419,6 +433,10 @@ END_IF
       <LineId Id="86" Count="2" />
       <LineId Id="85" Count="0" />
       <LineId Id="55" Count="21" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="Walking_Robot_Control.Robot_Single_Motor_Action">
+      <LineId Id="2" Count="29" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Control.Safety">

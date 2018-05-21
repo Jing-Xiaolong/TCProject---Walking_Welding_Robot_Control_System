@@ -29,11 +29,7 @@ VAR_INPUT
 	// ====== Simulink模型:触地检测 ======
 	Current_Delay_Simulink	: FB_Tough_Signal_Detection_Simple(oid:=16#01010040);
 	Delay_Time_1			: LREAL := 0.6;						// 延迟的时间，默认150毫秒
-	Current_Fiter_Delay		: ARRAY[1..18] OF LREAL;			// 延迟后的电流输出
 	MINIMUM_Current_Change	: LREAL := 150;						// 最小电流的变化值,用于判断电流变化
-	Difference_Current		: ARRAY[1..18] OF LREAL;			// 电流变化差值
-	Mapping_Leg				: Leg_Control_Mapping_Model;		// 变量映射:实际腿->Simulink对应的腿
-
 	Current_Change			: ARRAY[1..18] OF LREAL;			// 电流变化
 	
 	Current_Turque_Leg		: ARRAY[1..18] OF LREAL;			// Mapping后的电流
@@ -71,6 +67,9 @@ VAR_INPUT
 		
 	// 定义但未使用的变量	
 	Home_Position 			: ARRAY[1..18] OF LREAL;			// Home结束后的位移值
+	Current_Fiter_Delay		: ARRAY[1..18] OF LREAL;			// 延迟后的电流输出
+	Difference_Current		: ARRAY[1..18] OF LREAL;			// 电流变化差值
+	Mapping_Leg				: Leg_Control_Mapping_Model;		// 变量映射:实际腿->Simulink对应的腿
 END_VAR
 
 VAR

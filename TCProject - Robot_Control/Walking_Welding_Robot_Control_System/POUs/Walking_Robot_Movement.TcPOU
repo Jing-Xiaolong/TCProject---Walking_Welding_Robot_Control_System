@@ -101,6 +101,7 @@ IF ExSetPoint_Execute OR Walking_Robot_Control.Home_Execute THEN
 	Robot_Simulink.Execute();	// Simulink模型使能
 END_IF
 
+	// 一但上电,就激活电流滤波的Simulink
 IF Walking_Robot_Control.Power_Execute THEN
 	Filter_Current_Simulink.Execute();
 END_IF
@@ -126,8 +127,8 @@ END_IF
 IF ExSetPoint_Execute THEN
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
 		Walking_Robot_Control.Axis_Robot[Axis_Number].ExtSetPoint(	Drive_ExtSetPointEnable:= ExtSetPointEnable, 
-													Drive_ExtSetPointDisable:= ExtSetPointDisable, 
-													ExSetPosition:= ExSetPoint_Position[Axis_Number]);
+																	Drive_ExtSetPointDisable:= ExtSetPointDisable, 
+																	ExSetPosition:= ExSetPoint_Position[Axis_Number]);
 	END_FOR
 END_IF
 
@@ -158,7 +159,8 @@ ELSIF NOT ExSetPoint_Execute THEN
 	// 外部信号发生不使能时,外部信号不能执行
 	ExtSetPointEnable := 0;							
 	ExtSetPointDisable :=0;
-ELSIF ExtSetPointDisable THEN
+END_IF
+IF ExtSetPointDisable THEN
 	// 外部信号发生停止时,外部信号发生开始不能使能,即两者必须互斥
 	ExtSetPointEnable :=0;
 END_IF
@@ -242,53 +244,111 @@ END_FOR
 // ====== 位置映射 ======
 	// 变量映射:Simulink模型->实际电机
 Mapping_Position(Model_Leg_Variable:= Model_Position);
+
 	// 变量映射:实际电机->Simulink模型
 	// 输出的Leg_Lengths目前(2018.5.21)还未使用
 Mapping_Position1(Controller_Leg_Variable:= Walking_Robot_Control.Axis_ActPostion, Model_Leg_Variable=> Leg_Lengths);
 
-Touch_Signal			:= Touch_Signal_1;
+Touch_Signal := Touch_Signal_1;
+
 FOR Leg_Number := 1 TO 6 {BY 1} DO
 	Robot_Simulink.stInput.Touch_Signal[Leg_Number-1]	:= BOOL_TO_LREAL(Touch_Signal[Leg_Number]);		// 传感器采集到的触地信号
 END_FOR
 
 	// 模型输入链接
-Robot_Simulink.stInput.t := t;								// 采样时间t与Simulink模型中的采样时间链接								
-Robot_Simulink.stInput.Step_Test		:= Step_Test;		// 测试模式
-Robot_simulink.stInput.params_x := params_x;
-Robot_simulink.stInput.params_y := params_y;
-Robot_simulink.stInput.params_z := params_z;
+Robot_Simulink.stInput.t 			:= t;					// 采样时间t与Simulink模型中的采样时间链接								
+Robot_Simulink.stInput.Step_Test	:= Step_Test;			// 测试模式
+Robot_simulink.stInput.params_x 	:= params_x;
+Robot_simulink.stInput.params_y 	:= params_y;
+Robot_simulink.stInput.params_z 	:= params_z;
 Robot_simulink.stInput.params_alpha := params_alpha;
-Robot_simulink.stInput.params_beta := params_beta;
-Robot_simulink.stInput.params_gama := params_gama;
-Robot_simulink.stInput.Mode_Move := Mode_Move;
+Robot_simulink.stInput.params_beta 	:= params_beta;
+Robot_simulink.stInput.params_gama 	:= params_gama;
+Robot_simulink.stInput.Mode_Move 	:= Mode_Move;
 Robot_simulink.stInput.t_Trajectory := t_traj;
-Robot_simulink.stInput.R_Circle := R_circle;
+Robot_simulink.stInput.R_Circle 	:= R_circle;
 
 	// 模型输出
-Model_Position := Robot_Simulink.stOutput.Disp_P;			// Simulink中的电机输出位移输入到控制模型
+Model_Position 	:= Robot_Simulink.stOutput.Disp_P;			// Simulink中的电机输出位移输入到控制模型
 realState		:= Robot_Simulink.stOutput.realState;		// 模型监测状态量
 state			:= Robot_Simulink.stOutput.state;			// 模型监测状态量
-Number			:= Robot_Simulink.stOutput.Number;
-Act_Slice := Robot_simulink.stOutput.Act_Slice;
-Act_Lout := Robot_simulink.stOutput.Act_Lout;
+Number			:= Robot_Simulink.stOutput.Number;			// 已运行周期个数
+Act_Slice 		:= Robot_simulink.stOutput.Act_Slice;
+Act_Lout 		:= Robot_simulink.stOutput.Act_Lout;
 
-	// 模型输入定义
+	// 若是用户自行指定到达的地方,则使用用户指定的数据;否则,使用默认的直线
 IF Walking_Welding_Robot_Control.Walking_Welding_Robot_control AND Walking_Welding_Robot_Control.User_Moving_Control THEN
-	params_x[1] := 0;params_x[2] := Walking_Welding_Robot_Control.Robot_Walking_Vz;params_x[3] := 0;params_x[4] := 0;params_x[5] := 0;
-	params_y[1] := 0;params_y[2] := 0.548901719911339;params_y[3] := 0;params_y[4] := 0;params_y[5] := 0;
-	params_z[1] := 0;params_z[2] := Walking_Welding_Robot_Control.Robot_Walking_Vx;params_z[3] := 0;params_z[4] := 0;params_z[5] := 0;
+	params_x[1] := 0;
+	params_x[2] := Walking_Welding_Robot_Control.Robot_Walking_Vz;
+	params_x[3] := 0;
+	params_x[4] := 0;
+	params_x[5] := 0;
 	
-	params_alpha[1] := 0;params_alpha[2] := Walking_Welding_Robot_Control.Robot_Walking_Va;params_alpha[3] := 0;params_alpha[4] := 0;params_alpha[5] := 0;
-	params_beta[1] := 0;params_beta[2] := 0;params_beta[3] := 0;params_beta[4] := 0;params_beta[5] := 0;
-	params_gama[1] := 0;params_gama[2] := 0;params_gama[3] := 0;params_gama[4] := 0;params_gama[5] := 0;
+	params_y[1] := 0;
+	params_y[2] := 0.548901719911339;
+	params_y[3] := 0;
+	params_y[4] := 0;
+	params_y[5] := 0;
+	
+	params_z[1] := 0;
+	params_z[2] := Walking_Welding_Robot_Control.Robot_Walking_Vx;
+	params_z[3] := 0;
+	params_z[4] := 0;
+	params_z[5] := 0;
+	
+	params_alpha[1] := 0;
+	params_alpha[2] := Walking_Welding_Robot_Control.Robot_Walking_Va;
+	params_alpha[3] := 0;
+	params_alpha[4] := 0;
+	params_alpha[5] := 0;
+	
+	params_beta[1] := 0;
+	params_beta[2] := 0;
+	params_beta[3] := 0;
+	params_beta[4] := 0;
+	params_beta[5] := 0;
+	
+	params_gama[1] := 0;
+	params_gama[2] := 0;
+	params_gama[3] := 0;
+	params_gama[4] := 0;
+	params_gama[5] := 0;
 ELSE
-	params_x[1] := 0;params_x[2] := 0.01;params_x[3] := 0;params_x[4] := 0;params_x[5] := 0;
-	params_y[1] := 0;params_y[2] := 0.548901719911339;params_y[3] := 0;params_y[4] := 0;params_y[5] := 0;
-	params_z[1] := 0;params_z[2] := 0.03;params_z[3] := 0;params_z[4] := 0;params_z[5] := 0;
+	params_x[1] := 0;
+	params_x[2] := 0.01;
+	params_x[3] := 0;
+	params_x[4] := 0;
+	params_x[5] := 0;
 	
-	params_alpha[1] := 0;params_alpha[2] := pi/600;params_alpha[3] := 0;params_alpha[4] := 0;params_alpha[5] := 0;
-	params_beta[1] := 0;params_beta[2] := 0;params_beta[3] := 0;params_beta[4] := 0;params_beta[5] := 0;
-	params_gama[1] := 0;params_gama[2] := 0;params_gama[3] := 0;params_gama[4] := 0;params_gama[5] := 0;
+	params_y[1] := 0;
+	params_y[2] := 0.548901719911339;
+	params_y[3] := 0;
+	params_y[4] := 0;
+	params_y[5] := 0;
+	
+	params_z[1] := 0;
+	params_z[2] := 0.03;
+	params_z[3] := 0;
+	params_z[4] := 0;
+	params_z[5] := 0;
+		
+	params_alpha[1] := 0;
+	params_alpha[2] := pi/600;
+	params_alpha[3] := 0;
+	params_alpha[4] := 0;
+	params_alpha[5] := 0;
+	
+	params_beta[1] := 0;
+	params_beta[2] := 0;
+	params_beta[3] := 0;
+	params_beta[4] := 0;
+	params_beta[5] := 0;
+	
+	params_gama[1] := 0;
+	params_gama[2] := 0;
+	params_gama[3] := 0;
+	params_gama[4] := 0;
+	params_gama[5] := 0;
 END_IF]]></ST>
       </Implementation>
     </Action>
@@ -304,7 +364,9 @@ END_IF]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.ExSetPoint_Action">
-      <LineId Id="4" Count="26" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="8" Count="22" />
       <LineId Id="32" Count="17" />
       <LineId Id="1" Count="0" />
     </LineIds>
@@ -317,7 +379,9 @@ END_IF]]></ST>
       <LineId Id="37" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="39" Count="0" />
-      <LineId Id="6" Count="2" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="8" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="9" Count="1" />
       <LineId Id="30" Count="0" />
@@ -362,11 +426,13 @@ END_IF]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="85" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="199" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="40" Count="0" />
+      <LineId Id="200" Count="0" />
       <LineId Id="28" Count="0" />
       <LineId Id="30" Count="1" />
       <LineId Id="29" Count="0" />
@@ -381,8 +447,37 @@ END_IF]]></ST>
       <LineId Id="56" Count="1" />
       <LineId Id="41" Count="1" />
       <LineId Id="66" Count="1" />
-      <LineId Id="78" Count="5" />
-      <LineId Id="70" Count="7" />
+      <LineId Id="151" Count="3" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="155" Count="3" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="159" Count="3" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="163" Count="3" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="167" Count="3" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="171" Count="3" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="175" Count="3" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="179" Count="3" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="183" Count="3" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="187" Count="3" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="191" Count="3" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="195" Count="3" />
       <LineId Id="68" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>

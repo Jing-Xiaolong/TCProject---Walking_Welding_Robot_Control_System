@@ -97,7 +97,7 @@ ExSetPoint_Action();		// 外部发生程序]]></ST>
     </Implementation>
     <Action Name="ExSetPoint_Action" Id="{6f150c6c-5106-4820-9255-c9edf9211b93}">
       <Implementation>
-        <ST><![CDATA[// =======================模型使能=======================
+        <ST><![CDATA[// ====== 模型使能 ======
 IF ExSetPoint_Execute OR Walking_Robot_Control.Home_Execute THEN
 	Robot_Simulink.Execute();	// Simulink模型使能
 END_IF
@@ -106,7 +106,7 @@ IF Walking_Robot_Control.Power_Execute THEN
 	Filter_Current_Simulink.Execute();
 END_IF
 
-// =======================模型初始化=======================
+// ====== 模型初始化 ======
 IF Init_Execute THEN
 	Model_state	:=TCOM_STATE.TCOM_STATE_INIT;
 	t	:=0;
@@ -122,10 +122,9 @@ IF NOT Model_save_par THEN
 	Model_save_par:=tc3_module.SUCCEEDED(Robot_Simulink.SaveOnlineParametersForInit());
 END_IF
 
-// =======================外部信号运动程序=======================
+// ====== 外部信号发生:开始运动 ======
 
 IF ExSetPoint_Execute THEN
-	//SetGenerator();			// 使能外部信号发生子程序
 	FOR Axis_Number := 1 TO 18 {BY 1} DO
 		Walking_Robot_Control.Axis_Robot[Axis_Number].ExtSetPoint(	Drive_ExtSetPointEnable:= ExtSetPointEnable, 
 													Drive_ExtSetPointDisable:= ExtSetPointDisable, 
@@ -133,7 +132,7 @@ IF ExSetPoint_Execute THEN
 	END_FOR
 END_IF
 
-// ======================外部信号发生=========================
+// ====== 外部信号发生:采样时间累加 ======
 IF ExtSetPointEnable THEN	
 	t := t + t_Interval;
 	ExtSetPointDisable := FALSE;
@@ -148,23 +147,29 @@ END_IF]]></ST>
     </Action>
     <Action Name="Logic_Control" Id="{6ff3755a-9121-416a-ae3e-6ea6ca2447d3}">
       <Implementation>
-        <ST><![CDATA[// =====================外部信号发生逻辑========================
+        <ST><![CDATA[// ====== 外部信号发生逻辑 ======
 IF ExSetPoint_Execute THEN
-	Walking_Robot_Control.Home_Execute := FALSE;						// 外部信号发生使能时，机器人调零必须结束
-	Walking_Robot_Control.Move_Execute :=0;							// 外部信号发生时，不能进行其他运动
-	Init_Execute	  := FALSE;						// 外部信号发生时，模型不能使能
+	// 外部信号发生使能时,找零必须结束或不能找零
+	Walking_Robot_Control.Home_Execute := FALSE;
+	// 外部信号发生使能时,不能进行运动(特指站立,Move_Execute是站立使能)
+	Walking_Robot_Control.Move_Execute := 0;		
+	// 外部信号发生使能时,模型不能使能
+	Init_Execute := FALSE;
 ELSIF NOT ExSetPoint_Execute THEN
-	ExtSetPointEnable := 0;							// 外部信号发生不使能时，外部信号不能进入程序
+	// 外部信号发生不使能时,外部信号不能执行
+	ExtSetPointEnable := 0;							
 	ExtSetPointDisable :=0;
 ELSIF ExtSetPointDisable THEN
-	ExtSetPointEnable :=0;							// 外部信号发生停止与外部信号发生开始不能同时进行
+	// 外部信号发生停止时,外部信号发生开始不能使能,即两者必须互斥
+	ExtSetPointEnable :=0;
 END_IF
 
+	// 模型初始化时不能使能
 IF 	Robot_Simulink.State = TCOM_STATE.TCOM_STATE_INIT THEN
-	ExSetPoint_Execute 	:= FALSE;					// 模型初始化时不能使能
+	ExSetPoint_Execute 	:= FALSE;
 END_IF
 
-
+	// 找零、运动状态时,外部发生不能使能
 IF Walking_Robot_Control.Home_Execute OR Walking_Robot_Control.Move_Execute THEN
 	ExSetPoint_Execute := FALSE;
 END_IF]]></ST>
@@ -177,12 +182,11 @@ END_IF]]></ST>
     </Action>
     <Action Name="Touch_Signal_Detection" Id="{a7b09809-24f5-4205-965d-6459f7d21bee}">
       <Implementation>
-        <ST><![CDATA[// =======================用来进行触地信号的处理===================
+        <ST><![CDATA[// ====== 用来进行触地信号的处理 ======
 // 此处已经将电流的编号由控制中的编号转换成模型中的编号
 
 FOR Axis_Number := 1 TO 18 {BY 1} DO
 	current_Delay_Simulink.stInput.Current_Filter[Axis_Number-1]		:= Current_Turque_Leg[Axis_Number];
-	//Current_Fiter_Delay[Axis_Number] := Current_Delay_Simulink.stOutput.Variable_Delay[Axis_Number-1];
 	Current_Delay_Simulink.stInput.Delay_Time	:= Delay_Time_1;
 END_FOR
 
@@ -203,30 +207,44 @@ END_IF
     </Action>
     <Action Name="Variable_Monitor" Id="{02473303-261c-445b-9136-403286493e0a}">
       <Implementation>
-        <ST><![CDATA[// ==============实际运动位移和输入位移差值检测区==============
+        <ST><![CDATA[
+// ====== 检测实际运动位移和输入位移差值 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
+	// Walking_Robot_Control.Axis_ActPosition[] 是当前电机的实际位置
+	// Mapping_Position.Controller_Leg_Variable[] 是从Simulink模型映射而来的理论上的位置
+	// 另外,到目前位置(2018.5.21),Difference_Position还没有使用到
 	Difference_Position[Axis_Number] := Walking_Robot_Control.Axis_ActPostion[Axis_Number]- Mapping_Position.Controller_Leg_Variable[Axis_Number]; 
 END_FOR
 
-// ===================电流滤波环节===================
+
+	// 【注】:下面这段划分到Variable_Set中更好...
+// ====== 电流滤波环节 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
+	// 将Walking_Robot_Control中的电实际的电机电流值作为电流滤波Simulink的输入
 	Filter_Current_Simulink.stInput.Current_Motor[Axis_Number-1] := Walking_Robot_Control.Current_Turque_Value[Axis_Number];
+	// Current_Turque_Filter[Axis_Numer] := Filter_Current_Simulink.stInput.Current_Motor[Axis_Number-1]
 END_FOR	
 
+	// 滤波后的电机实际电流
 Current_Turque_Filter := Filter_Current_Simulink.stOutput.Current_Monitor;
+	
+	// 电流映射: 滤波后的电机实际电流 -> 滤波后的模型对应腿电流
 Mapping_Current_Filter(Controller_Leg_Variable:= Current_Turque_Filter, Model_Leg_Variable=> Current_Turque_Leg);]]></ST>
       </Implementation>
     </Action>
     <Action Name="Variable_Set" Id="{dd62ebc4-64fe-46c6-9ee6-b54b3152150e}">
       <Implementation>
-        <ST><![CDATA[// ===================外部信号发生电机位置输入值================
+        <ST><![CDATA[// ====== 外部信号发生电机位置输入值 ======
 FOR Axis_Number := 1 TO 18 {BY 1} DO
+	// 即映射之后每隔电机的值
 	ExSetPoint_Position[Axis_Number]:= Mapping_Position.Controller_Leg_Variable[Axis_Number];
 END_FOR
 
-// ===================程序与模型的变量链接===================
-Mapping_Position(Model_Leg_Variable:= Model_Position);		// 映射运动学模型中腿编号和控制模型中的电机编号
-
+// ====== 位置映射 ======
+	// 变量映射:Simulink模型->实际电机
+Mapping_Position(Model_Leg_Variable:= Model_Position);
+	// 变量映射:实际电机->Simulink模型
+	// 输出的Leg_Lengths目前(2018.5.21)还未使用
 Mapping_Position1(Controller_Leg_Variable:= Walking_Robot_Control.Axis_ActPostion, Model_Leg_Variable=> Leg_Lengths);
 
 Touch_Signal			:= Touch_Signal_1;
@@ -287,14 +305,25 @@ END_IF]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.ExSetPoint_Action">
-      <LineId Id="4" Count="45" />
+      <LineId Id="4" Count="26" />
+      <LineId Id="32" Count="17" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.Logic_Control">
-      <LineId Id="2" Count="2" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="5" Count="5" />
-      <LineId Id="30" Count="4" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="31" Count="3" />
       <LineId Id="11" Count="3" />
       <LineId Id="1" Count="0" />
     </LineIds>
@@ -305,7 +334,7 @@ END_IF]]></ST>
       <LineId Id="25" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="31" Count="1" />
-      <LineId Id="35" Count="1" />
+      <LineId Id="36" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="46" Count="1" />
       <LineId Id="8" Count="0" />
@@ -319,13 +348,23 @@ END_IF]]></ST>
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.Variable_Monitor">
-      <LineId Id="31" Count="10" />
+      <LineId Id="44" Count="7" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="56" Count="2" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="59" Count="4" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.Variable_Set">
-      <LineId Id="2" Count="3" />
-      <LineId Id="16" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="17" Count="0" />
       <LineId Id="34" Count="0" />
+      <LineId Id="86" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="40" Count="0" />

@@ -277,7 +277,7 @@ Act_Slice 		:= Robot_simulink.stOutput.Act_Slice;
 Act_Lout 		:= Robot_simulink.stOutput.Act_Lout;
 
 	// 若是用户自行指定到达的地方,则使用用户指定的数据;否则,使用默认的直线
-IF Walking_Welding_Robot_Control.Walking_Welding_Robot_control AND Walking_Welding_Robot_Control.User_Moving_Control THEN
+IF Walking_Welding_Robot_Control.Walking_Welding_Robot_Joint_control AND Walking_Welding_Robot_Control.User_Moving_Control THEN
 	params_x[1] := 0;
 	params_x[2] := Walking_Welding_Robot_Control.Robot_Walking_Vz;
 	params_x[3] := 0;

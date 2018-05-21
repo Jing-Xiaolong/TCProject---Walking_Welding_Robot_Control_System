@@ -566,7 +566,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"联合控制"</v>
+                      <v n="Value">"整体联合控制"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -574,7 +574,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"257"</v>
+                      <v n="Value">"275"</v>
                     </o>
                   </l>
                 </o>
@@ -1194,10 +1194,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>17fecdc4-b1d8-4fb6-9d47-27f0877d354c</v>
-                <v>FB_Exit</v>
-                <v>58b81ab9-f269-40d6-a527-f44c484ae7e6</v>
                 <v>FB_Reinit</v>
                 <v>fff10ee9-d284-40ed-bfb4-4ecbe8fd571a</v>
+                <v>FB_Exit</v>
+                <v>58b81ab9-f269-40d6-a527-f44c484ae7e6</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{283fa4fc-130b-4b7a-8e27-68b6e7624e1e}</v>

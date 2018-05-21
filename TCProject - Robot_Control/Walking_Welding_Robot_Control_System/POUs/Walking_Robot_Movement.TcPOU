@@ -40,8 +40,11 @@ VAR_INPUT
 	Leg_Touch				: ARRAY [1..3] OF LREAL;
 	Leg_Detection			: ARRAY [1..3] OF LREAL;
 	
-		// 模型输入
-	Step_Test				: BOOL := 1;								
+	// Simulink模型输入
+	Step_Test				: BOOL 	:= 1;						//
+	t_traj					: LREAL	:= 480;						// 行走时间
+	Mode_Move				: INT	:= 1;						// 行走模式
+		// 模式1 mode_move = 1,走多项式,多项式系数如下
 	params_x				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
 	params_y				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
 	params_z				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
@@ -50,19 +53,15 @@ VAR_INPUT
 	params_beta				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];	// 绕Z轴
 	params_gama				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];	// 绕X轴
 	
-	Mode_Move				: INT	:= 1;								// 移动模式：1模式
-	t_traj					: LREAL	:= 480;
+		// 模式2 mode_move = 2,走圆弧,行走半径R_circle
 	R_circle				: LREAL	:= 2;
 	
-		// 模型输出
-	//Disp_P				: ARRAY [1..18] OF LREAL;
+	// Simulink模型输出
 	realState				: LREAL;
 	state					: LREAL;
 	Number					: LREAL;
-	//Act_COM				: ARRAY [1..3] OF LREAL;
 	Act_Lout				: ARRAY [1..18] OF LREAL;
 	Act_Slice				: ARRAY [1..8] OF LREAL;
-	//Current_Turque_Leg		: ARRAY[1..18] OF LREAL;		// Mapping后的电流
 	Difference_Position		: ARRAY[1..18] OF LREAL;			// 实际位置与输入位置差值
 		
 	// 定义但未使用的变量	

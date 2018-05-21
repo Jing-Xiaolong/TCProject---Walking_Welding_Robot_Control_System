@@ -85,13 +85,20 @@ VAR_OUTPUT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// =======================子程序使能(永久运行)===================
-Variable_Monitor();			// 变量监测子程序使能
-Logic_Control();			// 逻辑控制子程序使能
-Variable_Set();				// 各动作速度子程序使能
-Touch_Signal_Detection();	// 触地信号检测
+      <ST><![CDATA[
+Variable_Monitor();			// 变量监测程序
 
-// =======================模型使能=======================
+Logic_Control();			// 逻辑控制程序
+
+Variable_Set();				// 变量设定程序
+
+Touch_Signal_Detection();	// 触地检测程序
+
+ExSetPoint_Action();		// 外部发生程序]]></ST>
+    </Implementation>
+    <Action Name="ExSetPoint_Action" Id="{6f150c6c-5106-4820-9255-c9edf9211b93}">
+      <Implementation>
+        <ST><![CDATA[// =======================模型使能=======================
 IF ExSetPoint_Execute OR Walking_Robot_Control.Home_Execute THEN
 	Robot_Simulink.Execute();	// Simulink模型使能
 END_IF
@@ -138,7 +145,8 @@ IF t>=T_ALL OR Walking_Robot_Control.Reset_Execute THEN
 	t:=0;
 	ExtSetPointDisable := TRUE;
 END_IF]]></ST>
-    </Implementation>
+      </Implementation>
+    </Action>
     <Action Name="Logic_Control" Id="{6ff3755a-9121-416a-ae3e-6ea6ca2447d3}">
       <Implementation>
         <ST><![CDATA[// =====================外部信号发生逻辑========================
@@ -269,34 +277,19 @@ END_IF]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="Walking_Robot_Movement">
-      <LineId Id="85" Count="2" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="487" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="488" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="489" Count="0" />
       <LineId Id="202" Count="0" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="132" Count="3" />
-      <LineId Id="281" Count="3" />
-      <LineId Id="392" Count="0" />
-      <LineId Id="291" Count="1" />
-      <LineId Id="296" Count="0" />
-      <LineId Id="298" Count="7" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="297" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="51" Count="5" />
-      <LineId Id="307" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="20" Count="1" />
-      <LineId Id="23" Count="2" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="310" Count="0" />
-      <LineId Id="32" Count="1" />
+      <LineId Id="492" Count="1" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Walking_Robot_Movement.ExSetPoint_Action">
+      <LineId Id="4" Count="45" />
+      <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Robot_Movement.Logic_Control">
       <LineId Id="2" Count="2" />

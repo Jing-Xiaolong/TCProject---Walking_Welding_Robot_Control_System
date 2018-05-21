@@ -4,83 +4,84 @@
     <Declaration><![CDATA[PROGRAM Walking_Robot_Movement
 VAR_INPUT
 	
-	Axis_Number 		: INT;							// 定义轴数目
+	Axis_Number 			: INT;								// 定义轴数目
 	
-	ExSetPoint_Execute	: BOOL;							// 机器人外部信号发生使能
-	ExtSetPointEnable	: BOOL;							// 外部信号发生信号
-	ExtSetPointDisable	: BOOL;							// 外部信号结束信号
+	ExSetPoint_Execute		: BOOL;								// 外部信号发生使能
+	ExtSetPointEnable		: BOOL;								// 外部信号发生开始
+	ExtSetPointDisable		: BOOL;								// 外部信号发生结束
 	
-	T_ALL				: LREAL:=40000;					// Simulink模型运动总时长
-	t_Interval			: LREAL:=0.005;					// 取样时间间隔，默认为1ms
-	t					: LREAL:=0;						// 取样当前时间变量，以0为起点
+	T_ALL					: LREAL := 40000;					// Simulink模型运动总时长
+	t_Interval				: LREAL := 0.005;					// 采样时间间隔，默认为1ms
+	t						: LREAL := 0;						// 当前采样时间，以0为起点
 	
-		
-	// ====================Simulink模块相关=====================
-	Robot_Simulink		: FB_RobotWalking_OnEvenTerrain(oid:=16#01010020);	// Simulink模型定义
-	Model_Position		: ARRAY[1..18] OF LREAL;			// Simulink中各个腿的位置
-	ExSetPoint_Position	: ARRAY[1..18] OF LREAL;			// 外部信号位置
-	Mapping_Position	: Variable_Model_Mapping_Control;	// 变量映射
-	Mapping_Position1	: Variable_Control_Mapping_Model;	// 将检测到的腿位置反馈到机器人控制模型		
-	Home_Position 		: ARRAY[1..18] OF LREAL;			// Home结束后的位移值
+	// ====== Simulink模块:平地行走 ======
+	Robot_Simulink			: FB_RobotWalking_OnEvenTerrain(oid:=16#01010020);
+	Model_Position			: ARRAY[1..18] OF LREAL;			// Simulink中各个腿的位置
+	ExSetPoint_Position		: ARRAY[1..18] OF LREAL;			// 外部信号位置
+	Mapping_Position		: Variable_Model_Mapping_Control;	// 变量映射:Simulink模型->实际电机
+	Mapping_Position1		: Variable_Control_Mapping_Model;	// 变量映射:检测到的实际腿位置->机器人Simulink控制模型		
 	
-	// ====================Simulink模块相关=====================
-	Filter_Current_Simulink  : FB_Filter_Current_Hexapod_Robot(oid:=16#01010030);
-	Current_Turque_Filter  	: ARRAY[1..18] OF LREAL;		// 滤波后电流
-	Mapping_Current_Filter	: Variable_Control_Mapping_Model;		// 变量映射,结果按模型中腿分布
+	// ====== Simulink模块:电流滤波 =======
+	Filter_Current_Simulink : FB_Filter_Current_Hexapod_Robot(oid:=16#01010030);
+	Current_Turque_Filter  	: ARRAY[1..18] OF LREAL;			// 滤波后电流
+	Mapping_Current_Filter	: Variable_Control_Mapping_Model;	// 变量映射:检测到的实际电流->Simulink对应电机的电流
 	
-	Current_Delay_Simulink	: FB_Tough_Signal_Detection_Simple(oid:=16#01010040);		// 输出延迟的电流
-	Delay_Time_1			: LREAL:=0.6;						// 延迟的时间，默认150毫秒
+	// ====== Simulink模型:触地检测 ======
+	Current_Delay_Simulink	: FB_Tough_Signal_Detection_Simple(oid:=16#01010040);
+	Delay_Time_1			: LREAL := 0.6;						// 延迟的时间，默认150毫秒
 	Current_Fiter_Delay		: ARRAY[1..18] OF LREAL;			// 延迟后的电流输出
-	MINIMUM_Current_Change	: LREAL	:=150;						// 最小电流的变化值
+	MINIMUM_Current_Change	: LREAL := 150;						// 最小电流的变化值,用于判断电流变化
 	Difference_Current		: ARRAY[1..18] OF LREAL;			// 电流变化差值
-	Mapping_Leg				: Leg_Control_Mapping_Model;		// 输出为模型中的腿标号
+	Mapping_Leg				: Leg_Control_Mapping_Model;		// 变量映射:实际腿->Simulink对应的腿
 
 	Current_Change			: ARRAY[1..18] OF LREAL;			// 电流变化
 	
 	Current_Turque_Leg		: ARRAY[1..18] OF LREAL;			// Mapping后的电流
 	
-	Touch_Signal	: ARRAY [1..6] OF BOOL := [0,0,0,0,0,0];
-	Touch_Signal_1	: ARRAY [1..6] OF BOOL;
-	Leg_Lengths		: ARRAY [1..18] OF LREAL;
-	Leg_Touch		: ARRAY [1..3] OF LREAL;
-	Leg_Detection	: ARRAY [1..3] OF LREAL;
+	Touch_Signal			: ARRAY [1..6] OF BOOL := [0,0,0,0,0,0];
+	Touch_Signal_1			: ARRAY [1..6] OF BOOL;
+	Leg_Lengths				: ARRAY [1..18] OF LREAL;
+	Leg_Touch				: ARRAY [1..3] OF LREAL;
+	Leg_Detection			: ARRAY [1..3] OF LREAL;
 	
 		// 模型输入
-	Step_Test		: BOOL :=1;
-	params_x		: ARRAY [1..5] OF LREAL:=[0,0,0,0,0];
-	params_y		: ARRAY [1..5] OF LREAL:=[0,0,0,0,0];
-	params_z		: ARRAY [1..5] OF LREAL:=[0,0,0,0,0];
+	Step_Test				: BOOL := 1;								
+	params_x				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
+	params_y				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
+	params_z				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];
 	
-	params_alpha	: ARRAY [1..5] OF LREAL:=[0,0,0,0,0]; 	// 绕Y轴
-	params_beta		: ARRAY [1..5] OF LREAL:=[0,0,0,0,0];		// 绕Z轴
-	params_gama		: ARRAY [1..5] OF LREAL:=[0,0,0,0,0];		// 绕X轴
+	params_alpha			: ARRAY [1..5] OF LREAL := [0,0,0,0,0]; 	// 绕Y轴
+	params_beta				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];	// 绕Z轴
+	params_gama				: ARRAY [1..5] OF LREAL := [0,0,0,0,0];	// 绕X轴
 	
-	Mode_Move		: INT := 1;
-	t_traj			: LREAL := 480;
-	R_circle		: LREAL := 2;
+	Mode_Move				: INT	:= 1;								// 移动模式：1模式
+	t_traj					: LREAL	:= 480;
+	R_circle				: LREAL	:= 2;
 	
 		// 模型输出
-	//Disp_P		: ARRAY [1..18] OF LREAL;
-	realState		: LREAL;
-	state			: LREAL;
-	Number			: LREAL;
-	//Act_COM		: ARRAY [1..3] OF LREAL;
-	Act_Lout		: ARRAY [1..18] OF LREAL;
-	Act_Slice		: ARRAY [1..8] OF LREAL;
-	
+	//Disp_P				: ARRAY [1..18] OF LREAL;
+	realState				: LREAL;
+	state					: LREAL;
+	Number					: LREAL;
+	//Act_COM				: ARRAY [1..3] OF LREAL;
+	Act_Lout				: ARRAY [1..18] OF LREAL;
+	Act_Slice				: ARRAY [1..8] OF LREAL;
 	//Current_Turque_Leg		: ARRAY[1..18] OF LREAL;		// Mapping后的电流
-	
-	Difference_Position	: ARRAY[1..18] OF LREAL;			// 实际位置与输入位置差值
+	Difference_Position		: ARRAY[1..18] OF LREAL;			// 实际位置与输入位置差值
+		
+	// 定义但未使用的变量	
+	Home_Position 			: ARRAY[1..18] OF LREAL;			// Home结束后的位移值
 END_VAR
 
 VAR
-	Leg_Number			: INT;							// 定义机器人腿数
-	Init_Execute		: BOOL;							// 机器人运动Simulink模型初始化使能
+	Leg_Number				: INT;								// 定义机器人腿数
+	Init_Execute			: BOOL;								// 机器人运动Simulink模型初始化使能
 	Model_state: TCOM_STATE :=TCOM_STATE.TCOM_STATE_OP;
-	Model_save_par		: BOOL;
+	Model_save_par			: BOOL;
 END_VAR
 
 VAR_OUTPUT
+	
 END_VAR
 ]]></Declaration>
     <Implementation>

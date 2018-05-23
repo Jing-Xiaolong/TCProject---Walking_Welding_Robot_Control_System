@@ -156,14 +156,16 @@ END_IF
 
 	// [重置使能]关闭,所有电机均不能重置
 IF NOT Reset_Execute THEN
-	Axis_Reset[Axis_Number] := FALSE;
-	Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
+	FOR Axis_Number := 1 TO 18 {BY 1} DO
+		Axis_Reset[Axis_Number] := FALSE;
+		Axis_Robot[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
+	END_FOR
 END_IF
 
 	// 这五行两个作用： 1. 若电机没错误,则不允许重置
 	// 2. 清除错误后自动将[单电机重置]信号关闭,不然得手动关闭
 FOR Axis_Number := 1 TO 18 {BY 1} DO
-	IF NOT Axis_Error[1] THEN
+	IF NOT Axis_Error[Axis_Number] THEN
 		Axis_Reset[Axis_Number] := FALSE;
 	END_IF
 END_FOR
@@ -505,8 +507,10 @@ END_IF
       <LineId Id="192" Count="0" />
       <LineId Id="180" Count="0" />
       <LineId Id="179" Count="0" />
+      <LineId Id="194" Count="0" />
       <LineId Id="125" Count="0" />
       <LineId Id="193" Count="0" />
+      <LineId Id="195" Count="0" />
       <LineId Id="127" Count="0" />
       <LineId Id="190" Count="0" />
       <LineId Id="181" Count="0" />

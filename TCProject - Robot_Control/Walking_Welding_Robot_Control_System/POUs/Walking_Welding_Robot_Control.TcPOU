@@ -3,131 +3,169 @@
   <POU Name="Walking_Welding_Robot_Control" Id="{8e39efaa-e50d-42a8-85bf-d06f1376f76b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Walking_Welding_Robot_Control
 VAR_INPUT
-	// ===================控制任务界定信号==========
-	Walking_Welding_Robot_control			: BOOL;
-	Walking_Robot_Test						: BOOL;
-	Welding_Arm_Test						: BOOL;
+	// ====== 整体界面激活 ======
+	Walking_Welding_Robot_Joint_Control	: BOOL;				// 允许对界面进行操作,对应UI中的Enable_All_Buttons
 	
-	// ===================模块动作信号(按动作先后排列)==========
-	Walking_Welding_Robot_Power_Execute 	: BOOL;							// 上电使能控制信号
-	Walking_Welding_Robot_Power			 	: BOOL;							// 整体使能控制信号
-	Walking_Welding_Robot_Home_Execute		: BOOL;							// 设置零点程序使能
-	Walking_Welding_Robot_Home_Set			: BOOL;							// 整体找零控制信号
-	Walking_Welding_Robot_Moving_Execute	: BOOL;							// 移动焊接机器人运动使能
-	Walking_Welding_Robot_Moving_Enable		: BOOL;							// 机器人运动开始信号
-END_VAR
-
-VAR_OUTPUT
-	// ===================控制信号输入=============
-	// 六足运动位置定义(按潘阳坐标系) - 用户操作控制
-	Robot_Walking_Z							: LREAL:=2;						// 机器人运动末位置Z坐标
-	Robot_Walking_X							: LREAL:=0.8;						// 机器人运动末位置X坐标
-	Robot_Walking_alpha						: LREAL:=pi/6;						// 机器人运动到末位置绕Y轴转角
-	Robot_Walking_Velocity					: LREAL:=0.04;						// 机器人运动速度
-	Robot_Walking_Vx						: LREAL;						// 机器人X方向运动速度
-	Robot_Walking_Vz						: LREAL;						// 机器人Z方向运动速度
-	Robot_Walking_Va						: LREAL;						// 机器人方位转动速度
+	// ====== 模块使能信号 ======
+	Walking_Welding_Robot_Power 		: BOOL;				// [24电机上电]
+	Walking_Welding_Robot_Home_Execute	: BOOL;				// [找零使能]
+	Walking_Welding_Robot_Moving_Execute: BOOL;				// [运动使能]
+	
+	// ====== 控制类型选择 ======
+	User_Moving_Control					: BOOL;				// 用户输入目标位置进行运动
+	Auto_Moving_Control					: BOOL;				// 机器人自主根据Walking_Robot_Movement的默认参数进行运动
 END_VAR
 
 VAR
-	User_Moving_Control						: BOOL;
-	Robot_Auto_Moving						: BOOL;
+	// ===================控制信号输入=============
+	// 六足运动位置定义(按潘阳坐标系) - 用户操作控制
+		// 用户指定目标位置
+	Robot_Walking_Z						: LREAL := 1.00;	// 用户指定运动 : Z方向目标位置
+	Robot_Walking_X						: LREAL := 0.40;	// 用户指定运动 : X方向目标位置
+	Robot_Walking_alpha					: LREAL := pi/12;	// 用户指定运动 : 绕Y轴旋转角度
+	Robot_Walking_Velocity				: LREAL := 0.03;	// 用户指定运动 : 机器人运动速度默认0.03m/s
+		// 机器人各方向运动速度
+	Robot_Walking_Vx					: LREAL;			// X方向运动速度
+	Robot_Walking_Vz					: LREAL;			// Z方向运动速度
+	Robot_Walking_Va					: LREAL;			// Y方向转动速度
+		// 机器人从当前位置运动到目标位置所需时间
+	Robot_Walking_t						: LREAL;			// 运动总时间
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[Logic_Control();			// 逻辑控制子程序使能
-Variable_Set();				// 变量设置子程序使能
+      <ST><![CDATA[
+Logic_Control();			// 逻辑控制程序
 
-// 六足机器人运动输入计算
-Robot_Walking_Vx 	:= Robot_Walking_Velocity*SIN(ATAN(Robot_Walking_X/Robot_Walking_Z));
-Robot_Walking_Vz 	:= Robot_Walking_Velocity*COS(ATAN(Robot_Walking_X/Robot_Walking_Z));
-Robot_Walking_Va	:= Robot_Walking_alpha/Robot_Walking_Z*Robot_Walking_Vz;
-
-// 六足或焊接臂运动控制切换计算
-IF User_Moving_Control THEN
-	IF (Robot_Walking_Z-Walking_Robot_Movement.Act_Slice[3])< 0.05 OR (Robot_Walking_X-Walking_Robot_Movement.Act_Slice[4])<0.05 THEN
-		IF Walking_Robot_Movement.state=2 AND Walking_Robot_Movement.realState=3 THEN
-			Walking_Robot_Movement.ExtSetPointEnable 	:= FALSE;
-			Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
-		END_IF
-	//ELSE
-		//Walking_Robot_Movement.ExtSetPointEnable 		:= TRUE;
-		//Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
-	END_IF
-ELSIF Robot_Auto_Moving THEN
-	IF ABS(Walking_Robot_Movement.Act_Slice[3]-Robot_Walking_Z)<0.1 OR ABS(Walking_Robot_Movement.Act_Slice[4]-Robot_Walking_X)<0.1 THEN
-		IF Walking_Robot_Movement.state=2 AND Walking_Robot_Movement.realState=3 THEN
-			Walking_Robot_Movement.ExtSetPointEnable 	:= FALSE;
-			Welding_Arm_Movement.ExtSetPointEnable 		:= TRUE;
-		END_IF
-	ELSE
-		Walking_Robot_Movement.ExtSetPointEnable 	:= TRUE;
-		Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
-	END_IF
-END_IF
-// 找零运动控制]]></ST>
+Input_Calculate();			// 用户输入参数计算]]></ST>
     </Implementation>
+    <Action Name="Input_Calculate" Id="{b5c30816-2ced-4339-a33f-bf0265d57637}">
+      <Implementation>
+        <ST><![CDATA[
+
+
+// 用户指定目标位置,以当前位置为[0,0,0,0,0,0],按照机器人进行匀速运动,计算三个方向的速度
+	// 沿X方向移动的速度分量 Vx = V * sin(theta)
+Robot_Walking_Vx 	:= Robot_Walking_Velocity * SIN(ATAN(Robot_Walking_X/Robot_Walking_Z));
+	// 沿Z方向移动的速度分量 Vz = V * cos(theta)
+Robot_Walking_Vz 	:= Robot_Walking_Velocity * COS(ATAN(Robot_Walking_X/Robot_Walking_Z));
+	// 机器人运动的总时间 t = Z / Vz
+Robot_Walking_t		:= Robot_Walking_Z / Robot_Walking_Vz;	
+	// 沿Y方向转动的速度分量 Va = alpha / t
+Robot_Walking_Va	:= Robot_Walking_alpha / Robot_Walking_t;
+
+
+// Simulink里的模型是以最开始的位置为全局坐标系,走到目标位置后
+// 再想走一段的话重新给Vx,Vz,Va会发生什么呢？  
+
+// 如果此时将Simulink模型的输入时间改为t=0会发生什么
+
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="Logic_Control" Id="{e5c642c3-d7b4-4082-93ff-06dce25ef1a4}">
       <Implementation>
         <ST><![CDATA[// ************************整体移动焊接机器人控制逻辑***********************
 
-//  ===================整体移动焊接机器人控制方式逻辑===================
-IF Walking_Welding_Robot_control THEN			// 整体移动焊接机器人控制
-	// 允许上电使能控制
-	IF Walking_Welding_Robot_Power_Execute THEN
-		Walking_Robot_Control.Power_Execute := TRUE;
-		Walking_Robot_Control.Robot_Power	:= TRUE;
-		Welding_Arm_Control.Power_Execute 	:= TRUE;
-		Welding_Arm_Control.Welding_Arm_Power := TRUE;
-	ELSIF NOT Walking_Welding_Robot_Power_Execute THEN
-		Walking_Robot_Control.Power_Execute := FALSE;
-		Walking_Robot_Control.Robot_Power	:= FALSE;
-		Welding_Arm_Control.Power_Execute 	:= FALSE;	
-		Walking_Robot_Control.Robot_Power	:= FALSE;
+//  激活整个模块后,允许使用界面上的按钮进行操作,这样才能进行整体上电、找零、运动
+IF Walking_Welding_Robot_Joint_control THEN
+	// 上电、找零、运动三者逻辑
+		// 未上电,不能找零和运动
+	IF NOT Walking_Welding_Robot_Power THEN
+		Walking_Welding_Robot_Home_Execute 	:= FALSE;
+		Walking_Welding_Robot_Moving_Execute:= FALSE;
 	END_IF
-	
-	// 允许找零使能控制
+		// 找零时,不能运动
 	IF Walking_Welding_Robot_Home_Execute THEN
-		Walking_Robot_Control.Home_Execute 	:= TRUE;
-		Walking_Robot_Control.Robot_Home_Set	:= TRUE;	
-		Welding_Arm_Control.Home_Execute 	:= TRUE;
-		Welding_Arm_Control.Welding_Arm_Home_Set	:= TRUE;
+		Walking_Welding_Robot_Moving_Execute:= FALSE;
+	END_IF
+		// 运动时,不能找零
+	IF Walking_Welding_Robot_Moving_Execute THEN
+		Walking_Welding_Robot_Home_Execute 	:= FALSE;
+	END_IF	
+
+	// 上电逻辑
+		// [24电机上电]开启,则通过对应的控制PRG直接将所有电机整体上电
+	IF Walking_Welding_Robot_Power THEN
+		Walking_Robot_Control.Power_Execute 	:= TRUE;
+		Walking_Robot_Control.Robot_Power		:= TRUE;
+		Welding_Arm_Control.Power_Execute 		:= TRUE;
+		Welding_Arm_Control.Welding_Arm_Power 	:= TRUE;
+		// [24电机上电]关闭,通过对应的控制PRG直接将所有电机整体断电
+	ELSIF NOT Walking_Welding_Robot_Power THEN
+		Walking_Robot_Control.Power_Execute 	:= FALSE;
+		Walking_Robot_Control.Robot_Power		:= FALSE;
+		Welding_Arm_Control.Power_Execute 		:= FALSE;	
+		Welding_Arm_Control.Welding_Arm_Power	:= FALSE;
+	END_IF
+		
+	// 找零逻辑
+		// [找零使能],则允许用户对焊接臂/步行机器人分别进行整体找零
+		// 但仅仅是允许,找零动作的发生还需要用户通过界面上的按钮进行操作
+	IF Walking_Welding_Robot_Home_Execute THEN
+		Walking_Robot_Control.Home_Execute 		:= TRUE;	// 六足找零使能开启
+		Walking_Robot_Control.Robot_Home_Set	:= TRUE;	// 六足单组退找零使能开启
+		Welding_Arm_Control.Home_Execute 		:= TRUE;	// 焊接臂找零使能开启
 	ELSIF NOT Walking_Welding_Robot_Home_Execute THEN
-		Walking_Robot_Control.Home_Execute 	:= FALSE;
+		Walking_Robot_Control.Home_Execute 		:= FALSE;
 		Walking_Robot_Control.Robot_Home_Set	:= FALSE;
-		Welding_Arm_Control.Home_Execute 	:= FALSE;
-		Welding_Arm_Control.Welding_Arm_Home_Set	:= FALSE;
+		Welding_Arm_Control.Home_Execute 		:= FALSE;
 	END_IF
 	
-	// 允许运动使能控制
+	// 两种控制方式互斥
+	IF User_Moving_Control THEN
+		Auto_Moving_Control := FALSE;
+	END_IF
+	IF Auto_Moving_Control THEN
+		User_Moving_Control := FALSE;
+	END_IF
+	
+	// 运动控制逻辑
 	IF Walking_Welding_Robot_Moving_Execute THEN
-		Walking_Robot_Movement.ExSetPoint_Execute 	:= TRUE;
-		Welding_Arm_Movement.ExSetPoint_Execute 	:= TRUE;
+		// [运动使能],则允许用户对焊接臂/步行机器人分别进行运动控制,即两者外部发生使能
+		Walking_Robot_Movement.ExSetPoint_Execute 		:= TRUE;
+		Welding_Arm_Movement.ExSetPoint_Execute 		:= TRUE;
+
 		IF User_Moving_Control THEN
-			//Walking_Robot_Movement.ExtSetPointEnable 	:= TRUE;
-			//Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
-		ELSIF Robot_Auto_Moving THEN
-			Walking_Robot_Movement.ExtSetPointEnable 	:= TRUE;
+			Walking_Robot_Movement.ExtSetPointEnable	:= TRUE;
+			Walking_Robot_Movement.ExtSetPointDisable	:= FALSE;
+		ELSIF NOT User_Moving_Control THEN
+			Walking_Robot_Movement.ExtSetPointEnable	:= FALSE;
+			Walking_Robot_Movement.ExtSetPointDisable	:= TRUE;
 		END_IF
-	ELSIF NOT
-		Walking_Welding_Robot_Moving_Execute THEN
+		
+	ELSIF NOT Walking_Welding_Robot_Moving_Execute THEN
+		// [运动使能]关闭,不允许控制,且外部发生使能关闭
+		Auto_Moving_Control := FALSE;
+		User_Moving_Control := FALSE;
 		Walking_Robot_Movement.ExSetPoint_Execute 	:= FALSE;
 		Welding_Arm_Movement.ExSetPoint_Execute 	:= FALSE;
 	END_IF
 	
-	//  ===================内部逻辑===================
-	IF NOT Walking_Welding_Robot_Power_Execute THEN
-		Walking_Welding_Robot_Power_Execute := FALSE;
-		Walking_Welding_Robot_Home_Execute 	:= FALSE;
-		Walking_Welding_Robot_Moving_Execute:= FALSE;
-	ELSIF Walking_Welding_Robot_Home_Execute THEN
-		Walking_Welding_Robot_Moving_Execute:= FALSE;
-	ELSIF Walking_Welding_Robot_Moving_Execute THEN
-		Walking_Welding_Robot_Home_Execute := FALSE;
+		// 用户自定义行走,走到目标位置后停止
+	IF User_Moving_Control THEN
+		// 到达目标位置附近后停止
+		
+		IF (Robot_Walking_Z-Walking_Robot_Movement.Act_Slice[3])< 0.15 AND (Robot_Walking_X-Walking_Robot_Movement.Act_Slice[4])<0.15 THEN
+			// 到达目标位置,并且是六条腿支撑(state=2,realstate=3)的情况下,停止运动,并将User_Moving_Control复位
+			IF Walking_Robot_Movement.state = 2 AND Walking_Robot_Movement.realState = 3 THEN
+				// 先关使能信号,后关Enable和Disable两个外部运动开始信号
+				User_Moving_Control := FALSE;
+				Walking_Robot_Movement.ExtSetPointEnable 	:= FALSE;
+				Walking_Robot_Movement.ExtSetPointDisable	:= TRUE;
+			END_IF
+		//ELSE
+			//Walking_Robot_Movement.ExtSetPointEnable 		:= TRUE;
+		END_IF
+		
 	END_IF
-END_IF
-
-IF Walking_Robot_Test OR Welding_Arm_Test THEN	// 各部分单独调试，此操作转对应界面
-	Walking_Welding_Robot_control  			:= FALSE;
+	
+	
+	// 不激活界面,因此界面所有的按钮默认关闭
+ELSIF NOT Walking_Welding_Robot_Joint_Control THEN
+	Walking_Welding_Robot_Power 			:= FALSE;
+	Walking_Welding_Robot_Home_Execute 		:= FALSE;
+	Walking_Welding_Robot_Moving_Execute	:= FALSE;
+	User_Moving_Control						:= FALSE;
+	Auto_Moving_Control						:= FALSE;
 END_IF]]></ST>
       </Implementation>
     </Action>
@@ -142,61 +180,100 @@ END_IF]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="Walking_Welding_Robot_Control">
+      <LineId Id="180" Count="0" />
       <LineId Id="68" Count="0" />
-      <LineId Id="21" Count="1" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="44" Count="1" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="108" Count="1" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="60" Count="1" />
-      <LineId Id="63" Count="3" />
-      <LineId Id="110" Count="2" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="52" Count="1" />
+      <LineId Id="177" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Walking_Welding_Robot_Control.Input_Calculate">
+      <LineId Id="30" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Welding_Robot_Control.Logic_Control">
       <LineId Id="128" Count="1" />
       <LineId Id="125" Count="0" />
-      <LineId Id="130" Count="0" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="331" Count="12" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="223" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="82" Count="0" />
       <LineId Id="163" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="164" Count="0" />
+      <LineId Id="253" Count="0" />
       <LineId Id="85" Count="1" />
       <LineId Id="165" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="166" Count="0" />
       <LineId Id="83" Count="0" />
-      <LineId Id="115" Count="0" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="300" Count="0" />
       <LineId Id="131" Count="0" />
+      <LineId Id="254" Count="0" />
       <LineId Id="116" Count="1" />
       <LineId Id="167" Count="0" />
       <LineId Id="119" Count="0" />
-      <LineId Id="168" Count="0" />
       <LineId Id="121" Count="1" />
       <LineId Id="171" Count="0" />
       <LineId Id="123" Count="0" />
-      <LineId Id="173" Count="0" />
       <LineId Id="118" Count="0" />
-      <LineId Id="144" Count="3" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="353" Count="6" />
+      <LineId Id="302" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="147" Count="0" />
       <LineId Id="149" Count="0" />
-      <LineId Id="177" Count="1" />
-      <LineId Id="180" Count="2" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="194" Count="3" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="373" Count="3" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="384" Count="0" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="280" Count="1" />
+      <LineId Id="364" Count="1" />
       <LineId Id="148" Count="0" />
-      <LineId Id="183" Count="10" />
-      <LineId Id="90" Count="4" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="379" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="388" Count="0" />
+      <LineId Id="385" Count="2" />
+      <LineId Id="233" Count="2" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="377" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="296" Count="2" />
+      <LineId Id="90" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="Walking_Welding_Robot_Control.Variable_Monitor">

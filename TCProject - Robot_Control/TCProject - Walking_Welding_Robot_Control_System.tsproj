@@ -17300,7 +17300,7 @@ External Setpoint Generation:
 						<Var>
 							<Name>Walking_Robot_Control.Current_Turque_Value</Name>
 							<Comment>
-								<![CDATA[电流、力矩相关值]]>
+								<![CDATA[ 驱动检测到的实际电机的力矩]]>
 							</Comment>
 							<Type GUID="{5668CD8E-CF1C-B917-34BA-930C5970F763}">ARRAY [1..18] OF INT</Type>
 						</Var>

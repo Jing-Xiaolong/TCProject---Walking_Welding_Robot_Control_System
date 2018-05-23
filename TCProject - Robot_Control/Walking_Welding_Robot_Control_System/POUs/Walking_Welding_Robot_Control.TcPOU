@@ -20,10 +20,10 @@ VAR
 	// ===================控制信号输入=============
 	// 六足运动位置定义(按潘阳坐标系) - 用户操作控制
 		// 用户指定目标位置
-	Robot_Walking_Z						: LREAL := 2;		// 用户指定运动 : Z方向目标位置
-	Robot_Walking_X						: LREAL := 0.8;		// 用户指定运动 : X方向目标位置
-	Robot_Walking_alpha					: LREAL := pi/6;	// 用户指定运动 : 绕Y轴旋转角度
-	Robot_Walking_Velocity				: LREAL := 0.04;	// 用户指定运动 : 机器人运动速度默认0.04m/s
+	Robot_Walking_Z						: LREAL := 1.00;	// 用户指定运动 : Z方向目标位置
+	Robot_Walking_X						: LREAL := 0.40;	// 用户指定运动 : X方向目标位置
+	Robot_Walking_alpha					: LREAL := pi/12;	// 用户指定运动 : 绕Y轴旋转角度
+	Robot_Walking_Velocity				: LREAL := 0.03;	// 用户指定运动 : 机器人运动速度默认0.03m/s
 		// 机器人各方向运动速度
 	Robot_Walking_Vx					: LREAL;			// X方向运动速度
 	Robot_Walking_Vz					: LREAL;			// Z方向运动速度
@@ -94,7 +94,7 @@ IF Walking_Welding_Robot_Joint_control THEN
 		Walking_Robot_Control.Power_Execute 	:= FALSE;
 		Walking_Robot_Control.Robot_Power		:= FALSE;
 		Welding_Arm_Control.Power_Execute 		:= FALSE;	
-		Walking_Robot_Control.Robot_Power		:= FALSE;
+		Welding_Arm_Control.Welding_Arm_Power	:= FALSE;
 	END_IF
 		
 	// 找零逻辑
@@ -120,11 +120,10 @@ IF Walking_Welding_Robot_Joint_control THEN
 	
 	// 运动控制逻辑
 	IF Walking_Welding_Robot_Moving_Execute THEN
-		// [运动使能],则允许用户对焊接臂/步行机器人分别进行运动控制
-		// 但运动使能也仅仅是允许运动,运动的发生还需要用户通过界面上的按钮进行操作
+		// [运动使能],则允许用户对焊接臂/步行机器人分别进行运动控制,即两者外部发生使能
 		Walking_Robot_Movement.ExSetPoint_Execute 		:= TRUE;
 		Welding_Arm_Movement.ExSetPoint_Execute 		:= TRUE;
-		// 使能后,进行用户自定义运动控制
+
 		IF User_Moving_Control THEN
 			Walking_Robot_Movement.ExtSetPointEnable	:= TRUE;
 			Walking_Robot_Movement.ExtSetPointDisable	:= FALSE;
@@ -132,58 +131,41 @@ IF Walking_Welding_Robot_Joint_control THEN
 			Walking_Robot_Movement.ExtSetPointEnable	:= FALSE;
 			Walking_Robot_Movement.ExtSetPointDisable	:= TRUE;
 		END_IF
-		// 使能后,进行自主运动控制
-		IF Auto_Moving_Control THEN
-			;
-		END_IF
+		
 	ELSIF NOT Walking_Welding_Robot_Moving_Execute THEN
-		// 使能关闭,无论是用户自定义控制,还是自主运动控制,都不允许
+		// [运动使能]关闭,不允许控制,且外部发生使能关闭
 		Auto_Moving_Control := FALSE;
 		User_Moving_Control := FALSE;
-		// 此外,焊接臂/步行机器人[外部信号发生使能]均关闭,不能进行相应的外部发生运动控制
 		Walking_Robot_Movement.ExSetPoint_Execute 	:= FALSE;
 		Welding_Arm_Movement.ExSetPoint_Execute 	:= FALSE;
 	END_IF
 	
-		// 用户控制方式
+		// 用户自定义行走,走到目标位置后停止
 	IF User_Moving_Control THEN
-		IF (Robot_Walking_Z-Walking_Robot_Movement.Act_Slice[3])< 0.05 OR (Robot_Walking_X-Walking_Robot_Movement.Act_Slice[4])<0.05 THEN
+		// 到达目标位置附近后停止
+		
+		IF (Robot_Walking_Z-Walking_Robot_Movement.Act_Slice[3])< 0.15 AND (Robot_Walking_X-Walking_Robot_Movement.Act_Slice[4])<0.15 THEN
 			// 到达目标位置,并且是六条腿支撑(state=2,realstate=3)的情况下,停止运动,并将User_Moving_Control复位
 			IF Walking_Robot_Movement.state = 2 AND Walking_Robot_Movement.realState = 3 THEN
+				// 先关使能信号,后关Enable和Disable两个外部运动开始信号
+				User_Moving_Control := FALSE;
 				Walking_Robot_Movement.ExtSetPointEnable 	:= FALSE;
-				Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
+				Walking_Robot_Movement.ExtSetPointDisable	:= TRUE;
 			END_IF
 		//ELSE
 			//Walking_Robot_Movement.ExtSetPointEnable 		:= TRUE;
-			//Welding_Arm_Movement.ExtSetPointEnable 		:= FALSE;
 		END_IF
-		// 自主控制方式
-	ELSIF Auto_Moving_Control THEN
-		IF ABS(Walking_Robot_Movement.Act_Slice[3]-Robot_Walking_Z)<0.1 OR ABS(Walking_Robot_Movement.Act_Slice[4]-Robot_Walking_X)<0.1 THEN
-			IF Walking_Robot_Movement.state = 2 AND Walking_Robot_Movement.realState = 3 THEN
-				Walking_Robot_Movement.ExtSetPointEnable 	:= FALSE;
-				Welding_Arm_Movement.ExtSetPointEnable 		:= TRUE;
-			END_IF
-		ELSE
-			Walking_Robot_Movement.ExtSetPointEnable 		:= TRUE;
-			Welding_Arm_Movement.ExtSetPointEnable 			:= FALSE;
-		END_IF
+		
 	END_IF
 	
 	
-	// 不激活界面,因此界面所有的按钮失效
+	// 不激活界面,因此界面所有的按钮默认关闭
 ELSIF NOT Walking_Welding_Robot_Joint_Control THEN
-	// 上电按钮失效
 	Walking_Welding_Robot_Power 			:= FALSE;
-	// 找零按钮失效
 	Walking_Welding_Robot_Home_Execute 		:= FALSE;
-	// 运动按钮失效(包括使能按钮和运动开始按钮)
 	Walking_Welding_Robot_Moving_Execute	:= FALSE;
 	User_Moving_Control						:= FALSE;
 	Auto_Moving_Control						:= FALSE;
-	
-	// 这里需要注意:如果Walking_Welding_Robot_Control关闭了,不能直接对焊接臂和六足中的各个信号进行去使能
-	
 END_IF]]></ST>
       </Implementation>
     </Action>
@@ -257,7 +239,7 @@ END_IF]]></ST>
       <LineId Id="353" Count="6" />
       <LineId Id="302" Count="0" />
       <LineId Id="146" Count="0" />
-      <LineId Id="371" Count="1" />
+      <LineId Id="371" Count="0" />
       <LineId Id="147" Count="0" />
       <LineId Id="149" Count="0" />
       <LineId Id="268" Count="0" />
@@ -265,30 +247,32 @@ END_IF]]></ST>
       <LineId Id="283" Count="0" />
       <LineId Id="373" Count="3" />
       <LineId Id="256" Count="0" />
-      <LineId Id="269" Count="0" />
-      <LineId Id="257" Count="0" />
-      <LineId Id="284" Count="0" />
-      <LineId Id="179" Count="0" />
+      <LineId Id="384" Count="0" />
       <LineId Id="265" Count="0" />
       <LineId Id="258" Count="0" />
       <LineId Id="280" Count="1" />
-      <LineId Id="363" Count="2" />
+      <LineId Id="364" Count="1" />
       <LineId Id="148" Count="0" />
       <LineId Id="183" Count="0" />
       <LineId Id="259" Count="0" />
-      <LineId Id="228" Count="1" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="379" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="229" Count="0" />
       <LineId Id="370" Count="0" />
-      <LineId Id="230" Count="19" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="388" Count="0" />
+      <LineId Id="385" Count="2" />
+      <LineId Id="233" Count="2" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="249" Count="0" />
       <LineId Id="251" Count="0" />
       <LineId Id="377" Count="1" />
       <LineId Id="250" Count="0" />
-      <LineId Id="290" Count="0" />
       <LineId Id="289" Count="0" />
-      <LineId Id="291" Count="1" />
-      <LineId Id="295" Count="3" />
-      <LineId Id="368" Count="0" />
-      <LineId Id="366" Count="0" />
-      <LineId Id="369" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="296" Count="2" />
       <LineId Id="90" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>

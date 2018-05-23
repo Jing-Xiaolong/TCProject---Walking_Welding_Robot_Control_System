@@ -36,8 +36,9 @@ VAR
 	Axis_Number 				: INT;									// 定义轴数目
 	
 	// ====== 状态监测变量 ======
-	Power_Status				: ARRAY[1..MotorNum] OF BOOL;			// 单电机上电状态;
+	Power_Status				: ARRAY[1..MotorNum] OF BOOL;			// 单电机上电状态
 	Home_Done					: ARRAY[1..MotorNum] OF BOOL;			// 单电机找零状态
+	Welding_Arm_Home_Done		: BOOL;									// 机器臂找零完成状态
 	MoveAbsoluteDone			: ARRAY[1..MotorNum] OF BOOL;			// 单电机绝对运动状态
 	MoveRelativeDone			: ARRAY[1..MotorNum] OF BOOL;			// 单电机相对运动状态
 	
@@ -88,12 +89,20 @@ IF Welding_Arm_Error THEN
 	Reset_Execute := TRUE;
 ELSIF NOT Welding_Arm_Error THEN
 	Reset_Execute := FALSE;
-ELSIF NOT Reset_Execute THEN
+END_IF
+
+IF NOT Reset_Execute THEN
 	FOR Axis_Number := 1 TO MotorNum {BY 1} DO
 		Axis_Reset[Axis_Number] := FALSE;
 		Axis_Welding_Arm[Axis_Number].Reset(Drive_Reset:= Axis_Reset[Axis_Number]);
 	END_FOR
 END_IF
+	// 没有错误则不允许按按钮,或清除了错误按钮回弹
+FOR Axis_Number := 1 TO MotorNum {BY 1} DO
+	IF NOT Axis_Error[Axis_Number] THEN
+		Axis_Reset[Axis_Number] := FALSE;
+	END_IF
+END_FOR
 
 // ====== 上电逻辑 ======
 IF NOT Power_Execute THEN
@@ -337,6 +346,19 @@ ELSIF NOT Welding_Arm_Home_Set AND NOT Home_Execute THEN
 	END_FOR
 END_IF
 
+IF Home_Execute THEN
+	IF ABS(Welding_Arm_Movement.ExSetPoint_Position[1]-Axis_ActPostion[1]) < 0.1 AND
+		ABS(Welding_Arm_Movement.ExSetPoint_Position[2]-Axis_ActPostion[2]) < 0.1 AND
+		 ABS(Welding_Arm_Movement.ExSetPoint_Position[3]-Axis_ActPostion[3]) < 0.1 AND
+		  ABS(Welding_Arm_Movement.ExSetPoint_Position[4]-Axis_ActPostion[4]) < 0.1 AND
+		   ABS(Welding_Arm_Movement.ExSetPoint_Position[5]-Axis_ActPostion[5]) < 0.1 AND
+			ABS(Welding_Arm_Movement.ExSetPoint_Position[6]-Axis_ActPostion[6]) < 0.1 THEN
+		Welding_Arm_Home_Done := TRUE;
+	END_IF
+ELSIF NOT Home_Execute THEN
+	Welding_Arm_Home_Done := FALSE;
+END_IF
+
 // ====== 焊接臂所有电机绝对运动 ======
 IF Welding_Arm_Move_Execute THEN
 	IF Move_Absolute_Execute THEN
@@ -442,11 +464,17 @@ END_IF]]></ST>
       <LineId Id="92" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="90" Count="0" />
-      <LineId Id="16" Count="5" />
+      <LineId Id="16" Count="4" />
+      <LineId Id="115" Count="1" />
+      <LineId Id="21" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="85" Count="0" />
-      <LineId Id="24" Count="15" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="117" Count="2" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="25" Count="14" />
       <LineId Id="87" Count="0" />
       <LineId Id="40" Count="1" />
       <LineId Id="54" Count="0" />
@@ -536,7 +564,14 @@ END_IF]]></ST>
       <LineId Id="86" Count="0" />
       <LineId Id="96" Count="1" />
       <LineId Id="85" Count="0" />
-      <LineId Id="55" Count="21" />
+      <LineId Id="55" Count="4" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="127" Count="5" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="60" Count="16" />
       <LineId Id="106" Count="16" />
       <LineId Id="1" Count="0" />
     </LineIds>

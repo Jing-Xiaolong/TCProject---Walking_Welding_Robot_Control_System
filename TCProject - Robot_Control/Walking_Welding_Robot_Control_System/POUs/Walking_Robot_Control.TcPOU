@@ -97,9 +97,9 @@ IF Home_Execute THEN
 		// Simulink模型规定的单腿三电机初始位置与实际位置误差均小于0.01后,即可认为单腿找零完成
 		// 这里的Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable也可使用Axis_Robot[Axis_Number].Home_Absolute_Position
 		// 因为已经在Variable_Set中将前者设定为后者了
-		IF ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[1+(Leg_Number-1)*3]-Axis_ActPostion[1+(Leg_Number-1)*3])<0.01 AND 
-			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[2+(Leg_Number-1)*3]-Axis_ActPostion[2+(Leg_Number-1)*3])<0.01 AND
-			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[3+(Leg_Number-1)*3]-Axis_ActPostion[3+(Leg_Number-1)*3])<0.01 THEN
+		IF ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[1+(Leg_Number-1)*3]-Axis_ActPostion[1+(Leg_Number-1)*3])<0.1 AND 
+			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[2+(Leg_Number-1)*3]-Axis_ActPostion[2+(Leg_Number-1)*3])<0.1 AND
+			ABS(Walking_Robot_Movement.Mapping_Position.Controller_Leg_Variable[3+(Leg_Number-1)*3]-Axis_ActPostion[3+(Leg_Number-1)*3])<0.1 THEN
 			Leg_Home_Done[Leg_Number]	:= TRUE;
 		ELSE
 			Leg_Home_Done[Leg_Number]	:= FALSE;
@@ -124,6 +124,13 @@ IF Home_Execute THEN
 		ELSE
 			Robot_Home_Done			:= FALSE;
 		END_IF
+	END_FOR
+ELSIF NOT Home_Execute THEN
+	Robot_Home_Done 	:= FALSE;
+	Tripod_Home_Done[1] := FALSE;
+	Tripod_Home_Done[2] := FALSE;
+	FOR Leg_Number := 1 TO 6 {BY 1} DO
+		Leg_Home_Done[Leg_Number] := FALSE;
 	END_FOR
 END_IF
 
@@ -490,6 +497,7 @@ END_IF
       <LineId Id="39" Count="1" />
       <LineId Id="38" Count="0" />
       <LineId Id="11" Count="0" />
+      <LineId Id="70" Count="6" />
       <LineId Id="3" Count="0" />
       <LineId Id="41" Count="1" />
       <LineId Id="1" Count="0" />

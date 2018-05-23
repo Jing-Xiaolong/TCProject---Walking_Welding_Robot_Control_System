@@ -866,6 +866,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"342"</v>
+              <v n="TextDefault">"Leg_Home_Done"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"177"</v>
               <v n="TextDefault">"Model_Position[INDEX]"</v>
               <l n="LanguageTexts" t="ArrayList" />

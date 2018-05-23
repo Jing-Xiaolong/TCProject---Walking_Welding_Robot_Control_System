@@ -11,7 +11,7 @@ VAR_INPUT
 	ExtSetPointDisable		: BOOL;								// 外部信号发生结束
 	
 	T_ALL					: LREAL := 40000;					// Simulink模型运动总时长
-	t_Interval				: LREAL := 0.005;					// 采样时间间隔，默认为1ms
+	t_Interval				: LREAL := 0.004;					// 采样时间间隔，默认为1ms
 	t						: LREAL := 0;						// 当前采样时间，以0为起点
 	
 	// ====== Simulink模块:平地行走 ======
@@ -277,9 +277,10 @@ Act_Slice 		:= Robot_simulink.stOutput.Act_Slice;
 Act_Lout 		:= Robot_simulink.stOutput.Act_Lout;
 
 	// 若是用户自行指定到达的地方,则使用用户指定的数据;否则,使用默认的直线
-IF Walking_Welding_Robot_Control.Walking_Welding_Robot_Joint_control AND Walking_Welding_Robot_Control.User_Moving_Control THEN
+IF Walking_Welding_Robot_Control.Walking_Welding_Robot_Moving_Execute THEN
 	params_x[1] := 0;
-	params_x[2] := Walking_Welding_Robot_Control.Robot_Walking_Vz;
+	params_x[2] := Walking_Welding_Robot_Control.Robot_Walking_Vx;
+	//Params_x[2] := 0.01;
 	params_x[3] := 0;
 	params_x[4] := 0;
 	params_x[5] := 0;
@@ -291,13 +292,15 @@ IF Walking_Welding_Robot_Control.Walking_Welding_Robot_Joint_control AND Walking
 	params_y[5] := 0;
 	
 	params_z[1] := 0;
-	params_z[2] := Walking_Welding_Robot_Control.Robot_Walking_Vx;
+	params_z[2] := Walking_Welding_Robot_Control.Robot_Walking_Vz;
+	//params_z[2] := 0.03;
 	params_z[3] := 0;
 	params_z[4] := 0;
 	params_z[5] := 0;
 	
 	params_alpha[1] := 0;
 	params_alpha[2] := Walking_Welding_Robot_Control.Robot_Walking_Va;
+	//params_alpha[2] := pi/600;
 	params_alpha[3] := 0;
 	params_alpha[4] := 0;
 	params_alpha[5] := 0;
@@ -447,15 +450,21 @@ END_IF]]></ST>
       <LineId Id="56" Count="1" />
       <LineId Id="41" Count="1" />
       <LineId Id="66" Count="1" />
-      <LineId Id="151" Count="3" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="152" Count="2" />
       <LineId Id="201" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="155" Count="3" />
       <LineId Id="202" Count="0" />
       <LineId Id="79" Count="0" />
-      <LineId Id="159" Count="3" />
+      <LineId Id="159" Count="1" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="161" Count="1" />
       <LineId Id="80" Count="1" />
-      <LineId Id="163" Count="3" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="165" Count="1" />
       <LineId Id="203" Count="0" />
       <LineId Id="82" Count="0" />
       <LineId Id="167" Count="3" />

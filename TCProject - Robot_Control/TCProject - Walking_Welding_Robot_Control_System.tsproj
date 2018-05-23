@@ -17300,7 +17300,7 @@ External Setpoint Generation:
 						<Var>
 							<Name>Walking_Robot_Control.Current_Turque_Value</Name>
 							<Comment>
-								<![CDATA[电流、力矩相关值]]>
+								<![CDATA[ 驱动检测到的实际电机的力矩]]>
 							</Comment>
 							<Type GUID="{5668CD8E-CF1C-B917-34BA-930C5970F763}">ARRAY [1..18] OF INT</Type>
 						</Var>
@@ -18585,14 +18585,14 @@ External Setpoint Generation:
 						<Var>
 							<Name>Welding_Arm_Control.Current_Turque_Value</Name>
 							<Comment>
-								<![CDATA[ 电流、力矩相关值]]>
+								<![CDATA[ 单电机实际电流]]>
 							</Comment>
 							<Type GUID="{253B2CC1-6165-9969-47FC-89F64CEC1268}">ARRAY [1..6] OF INT</Type>
 						</Var>
 						<Var>
 							<Name>Welding_Arm_Control.Digital_Inputs</Name>
 							<Comment>
-								<![CDATA[ 数字输入信号（Link到驱动器中的Digital Inputs）]]>
+								<![CDATA[ 驱动数字输入信号（Link到驱动器中的Digital Inputs）]]>
 							</Comment>
 							<Type GUID="{253B2CC1-6165-9969-47FC-89F64CEC1267}">ARRAY [1..6] OF DINT</Type>
 						</Var>

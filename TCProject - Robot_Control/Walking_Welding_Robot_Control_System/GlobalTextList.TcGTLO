@@ -41,13 +41,28 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"300"</v>
+              <v n="TextDefault">" V = %.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"241"</v>
               <v n="TextDefault">" V=%.3f"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"297"</v>
+              <v n="TextDefault">" Xt = %.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"244"</v>
               <v n="TextDefault">" X_Act=%.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"339"</v>
+              <v n="TextDefault">" X_t = %.3f"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -58,6 +73,31 @@
             <o>
               <v n="TextID">"245"</v>
               <v n="TextDefault">" Y_Act=%.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"325"</v>
+              <v n="TextDefault">" Zt = %.3"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"298"</v>
+              <v n="TextDefault">" Zt = %.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"323"</v>
+              <v n="TextDefault">" Zt = %.3fm"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"324"</v>
+              <v n="TextDefault">" Zt = %.3m"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"296"</v>
+              <v n="TextDefault">" Zt=%.3f"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -76,8 +116,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"265"</v>
+              <v n="TextDefault">"%.2f mm/s"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"217"</v>
               <v n="TextDefault">"%.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"264"</v>
+              <v n="TextDefault">"%.4f mm"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -93,6 +143,31 @@
             <o>
               <v n="TextID">"179"</v>
               <v n="TextDefault">"1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"293"</v>
+              <v n="TextDefault">"134/246腿找零完成状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"305"</v>
+              <v n="TextDefault">"135腿"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"287"</v>
+              <v n="TextDefault">"135腿找零"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"306"</v>
+              <v n="TextDefault">"246腿"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"288"</v>
+              <v n="TextDefault">"246腿找零"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -496,8 +571,23 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"309"</v>
+              <v n="TextDefault">"CoM(质心)实际位置"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"246"</v>
               <v n="TextDefault">"CoM_Act"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"308"</v>
+              <v n="TextDefault">"CoM实际位置"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"334"</v>
+              <v n="TextDefault">"CoM（质心）实际位置"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -623,6 +713,21 @@
             <o>
               <v n="TextID">"38"</v>
               <v n="TextDefault">"Driver9_Reset"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"341"</v>
+              <v n="TextDefault">"Enable_All_Buttons"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"313"</v>
+              <v n="TextDefault">"Enable_All_Units"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"274"</v>
+              <v n="TextDefault">"Enable_Overall_Units"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -761,6 +866,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"342"</v>
+              <v n="TextDefault">"Leg_Home_Done"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"177"</v>
               <v n="TextDefault">"Model_Position[INDEX]"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -871,6 +981,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"270"</v>
+              <v n="TextDefault">"Simulink控制区域"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"176"</v>
               <v n="TextDefault">"State=%.3f"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -931,6 +1046,16 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"281"</v>
+              <v n="TextDefault">"Walking_Robot_Error"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"280"</v>
+              <v n="TextDefault">"Walking_Robot_Power"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"249"</v>
               <v n="TextDefault">"Welding_Arm"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -966,13 +1091,88 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"299"</v>
+              <v n="TextDefault">"αt = %.3f"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"191"</v>
               <v n="TextDefault">"上电操作"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"266"</v>
+              <v n="TextDefault">"上电操作区域"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"250"</v>
               <v n="TextDefault">"信号监测"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"273"</v>
+              <v n="TextDefault">"停止运动信号:"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"272"</v>
+              <v n="TextDefault">"停止运动终止信号:"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"316"</v>
+              <v n="TextDefault">"六足"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"336"</v>
+              <v n="TextDefault">"六足、运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"318"</v>
+              <v n="TextDefault">"六足上电"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"282"</v>
+              <v n="TextDefault">"六足上电状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"317"</v>
+              <v n="TextDefault">"六足坐标系示意图"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"315"</v>
+              <v n="TextDefault">"六足机器人坐标示意图"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"335"</v>
+              <v n="TextDefault">"六足正在运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"311"</v>
+              <v n="TextDefault">"六足运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"319"</v>
+              <v n="TextDefault">"六足错误"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"283"</v>
+              <v n="TextDefault">"六足错误状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"284"</v>
+              <v n="TextDefault">"关键状态监测"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1051,6 +1251,26 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"292"</v>
+              <v n="TextDefault">"对应找零完成状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"332"</v>
+              <v n="TextDefault">"开始行走"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"333"</v>
+              <v n="TextDefault">"开始行走到目标位置"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"338"</v>
+              <v n="TextDefault">"开始行走至目标位置"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"222"</v>
               <v n="TextDefault">"开始输入目标运动轨迹"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1058,6 +1278,11 @@
             <o>
               <v n="TextID">"149"</v>
               <v n="TextDefault">"开始输入轨迹"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"301"</v>
+              <v n="TextDefault">"开始运动信号"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1076,8 +1301,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"295"</v>
+              <v n="TextDefault">"找零完成状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"193"</v>
               <v n="TextDefault">"找零操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"268"</v>
+              <v n="TextDefault">"找零操作区域"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1091,6 +1326,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"275"</v>
+              <v n="TextDefault">"整体联合控制"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"25"</v>
               <v n="TextDefault">"是"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1098,6 +1338,16 @@
             <o>
               <v n="TextID">"204"</v>
               <v n="TextDefault">"是否允许找零操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"312"</v>
+              <v n="TextDefault">"是否允许此界面操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"329"</v>
+              <v n="TextDefault">"是否允许运动操作"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1111,6 +1361,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"328"</v>
+              <v n="TextDefault">"是否激活此界面操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"198"</v>
               <v n="TextDefault">"是否进行Simulink运动操作"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1121,8 +1376,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"303"</v>
+              <v n="TextDefault">"是否进行子机找零"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"58"</v>
               <v n="TextDefault">"是否进行找零操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"302"</v>
+              <v n="TextDefault">"是否进行整体上电"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1151,8 +1416,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"322"</v>
+              <v n="TextDefault">"暂时没有"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"199"</v>
               <v n="TextDefault">"本界面为Welding-Arm操作界面"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"276"</v>
+              <v n="TextDefault">"本界面为整体移动焊接机器人操作界面"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1206,6 +1481,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"269"</v>
+              <v n="TextDefault">"本界面用于焊接臂运动及控制操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"208"</v>
               <v n="TextDefault">"本界面用于焊接臂运动控制操作"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1226,13 +1506,83 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"307"</v>
+              <v n="TextDefault">"焊接臂"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"289"</v>
+              <v n="TextDefault">"焊接臂6电机找零"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"320"</v>
+              <v n="TextDefault">"焊接臂上电"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"285"</v>
+              <v n="TextDefault">"焊接臂上电状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"304"</v>
+              <v n="TextDefault">"焊接臂找零"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"294"</v>
+              <v n="TextDefault">"焊接臂找零完成状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"259"</v>
               <v n="TextDefault">"焊接臂调试与控制"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"310"</v>
+              <v n="TextDefault">"焊接臂运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"321"</v>
+              <v n="TextDefault">"焊接臂错误"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"286"</v>
+              <v n="TextDefault">"焊接臂错误状态"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"314"</v>
+              <v n="TextDefault">"状态监测"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"267"</v>
+              <v n="TextDefault">"状态监测区域"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"237"</v>
               <v n="TextDefault">"用户操作控制"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"291"</v>
+              <v n="TextDefault">"用户自定义行走"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"278"</v>
+              <v n="TextDefault">"用户自定义运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"277"</v>
+              <v n="TextDefault">"用户自定义运动制"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1248,6 +1598,31 @@
             <o>
               <v n="TextID">"253"</v>
               <v n="TextDefault">"自主规划控制"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"331"</v>
+              <v n="TextDefault">"自主规划行走"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"279"</v>
+              <v n="TextDefault">"自主规划运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"330"</v>
+              <v n="TextDefault">"自主规行走划运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"337"</v>
+              <v n="TextDefault">"自主运动使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"290"</v>
+              <v n="TextDefault">"行走开始"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1268,6 +1643,11 @@
             <o>
               <v n="TextID">"162"</v>
               <v n="TextDefault">"输入运动总时长 T_ALL(s)"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"327"</v>
+              <v n="TextDefault">"运动使能"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1321,8 +1701,23 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"326"</v>
+              <v n="TextDefault">"运运动使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"340"</v>
+              <v n="TextDefault">"这块还没完成"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"210"</v>
               <v n="TextDefault">"进行Simulink运动操作"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"271"</v>
+              <v n="TextDefault">"驱动重设区域"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
           </l>

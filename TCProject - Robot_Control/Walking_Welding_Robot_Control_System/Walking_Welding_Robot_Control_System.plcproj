@@ -123,6 +123,14 @@
     <Compile Include="VISUs\ImagePool.TcIPO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="VISUs\Visu_Welding_Arm_Power.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="VISUs\Visu_Welding_Arm_SimulinkMove.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
     <Compile Include="VISUs\Visu_Walking_Robot_Home.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
@@ -151,7 +159,7 @@
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
-    <Compile Include="VISUs\Visu_Welding_Arm_Move.TcVIS">
+    <Compile Include="VISUs\Visu_Welding_Arm_OldVersion.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>

@@ -1,1 +1,4 @@
-TCProject - Walking_Welding_Robot_Control_System_Version2
+TCProject - Walking_Welding_Robot_Control_System
+
+本项目为上海交通大学重装所六足移动焊机机器人控制系统
+目前已完成焊接臂的控制与调试，六足移动机器人的控制与调试
